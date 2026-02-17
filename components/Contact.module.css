@@ -1,0 +1,58 @@
+.contactGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.contactCard {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.contactIcon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iconEmail {
+    background: rgba(96, 165, 250, 0.1);
+    color: var(--accent-primary);
+}
+
+.iconGithub {
+    background: rgba(167, 139, 250, 0.1);
+    color: var(--accent-secondary);
+}
+
+.iconLinkedin {
+    background: rgba(52, 211, 153, 0.1);
+    color: var(--accent-green);
+}
+
+.iconInstagram {
+    background: rgba(244, 114, 182, 0.1);
+    color: var(--accent-pink);
+}
+
+.contactLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.125rem;
+}
+
+.contactValue {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}

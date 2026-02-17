@@ -1,0 +1,83 @@
+{
+    "nav": {
+        "home": "Beranda",
+        "about": "Tentang",
+        "skills": "Keahlian",
+        "projects": "Proyek",
+        "certificates": "Sertifikat",
+        "experience": "Pengalaman",
+        "education": "Pendidikan",
+        "contact": "Kontak",
+        "admin": "Admin"
+    },
+    "hero": {
+        "greeting": "Terbuka untuk peluang",
+        "subtitle": "Membangun aplikasi web modern dengan kode bersih dan solusi kreatif. Antusias mengubah ide menjadi kenyataan.",
+        "cta_resume": "Unduh Resume",
+        "cta_contact": "Hubungi Saya",
+        "cta_projects": "Lihat Proyek",
+        "scroll_down": "Gulir ke Bawah"
+    },
+    "about": {
+        "title": "Tentang Saya",
+        "subtitle": "Kenali saya lebih dekat"
+    },
+    "skills": {
+        "title": "Keahlian",
+        "subtitle": "Teknologi yang saya gunakan"
+    },
+    "projects": {
+        "title": "Proyek",
+        "subtitle": "Hal-hal yang telah saya bangun",
+        "view_live": "Demo Langsung",
+        "view_code": "Kode Sumber",
+        "featured": "Unggulan"
+    },
+    "certificates": {
+        "title": "Sertifikat",
+        "subtitle": "Sertifikasi & pencapaian saya",
+        "view_credential": "Lihat Kredensial",
+        "issued_by": "Diterbitkan oleh"
+    },
+    "experience": {
+        "title": "Pengalaman",
+        "subtitle": "Perjalanan profesional saya",
+        "present": "Sekarang"
+    },
+    "education": {
+        "title": "Pendidikan",
+        "subtitle": "Latar belakang akademik saya"
+    },
+    "contact": {
+        "title": "Kontak",
+        "subtitle": "Mari terhubung",
+        "email_me": "Kirim Email",
+        "find_me": "Temukan saya di"
+    },
+    "footer": {
+        "built_with": "Dibuat dengan",
+        "rights": "Hak cipta dilindungi"
+    },
+    "theme": {
+        "dark": "Gelap",
+        "light": "Terang"
+    },
+    "admin": {
+        "login": "Login Admin",
+        "email": "Email",
+        "password": "Kata Sandi",
+        "sign_in": "Masuk",
+        "sign_out": "Keluar",
+        "dashboard": "Dasbor",
+        "save": "Simpan Perubahan",
+        "add": "Tambah Baru",
+        "edit": "Edit",
+        "delete": "Hapus",
+        "cancel": "Batal",
+        "confirm_delete": "Apakah Anda yakin ingin menghapus item ini?",
+        "saved": "Perubahan berhasil disimpan!",
+        "error": "Terjadi kesalahan. Silakan coba lagi.",
+        "manage": "Kelola",
+        "back_to_site": "Kembali ke Situs"
+    }
+}

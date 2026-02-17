@@ -1,0 +1,45 @@
+.skillsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.categoryTitle {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--accent-secondary);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.skillItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skillHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.skillName {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.skillPercent {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .skillsGrid {
+        grid-template-columns: 1fr;
+    }
+}

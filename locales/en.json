@@ -1,0 +1,83 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "skills": "Skills",
+    "projects": "Projects",
+    "certificates": "Certificates",
+    "experience": "Experience",
+    "education": "Education",
+    "contact": "Contact",
+    "admin": "Admin"
+  },
+  "hero": {
+    "greeting": "Available for opportunities",
+    "subtitle": "Building modern web applications with clean code and creative solutions. Passionate about turning ideas into reality.",
+    "cta_resume": "Download Resume",
+    "cta_contact": "Get in Touch",
+    "cta_projects": "View Projects",
+    "scroll_down": "Scroll Down"
+  },
+  "about": {
+    "title": "About Me",
+    "subtitle": "Get to know me better"
+  },
+  "skills": {
+    "title": "Skills",
+    "subtitle": "Technologies I work with"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Things I've built",
+    "view_live": "Live Demo",
+    "view_code": "Source Code",
+    "featured": "Featured"
+  },
+  "certificates": {
+    "title": "Certificates",
+    "subtitle": "My certifications & achievements",
+    "view_credential": "View Credential",
+    "issued_by": "Issued by"
+  },
+  "experience": {
+    "title": "Experience",
+    "subtitle": "My professional journey",
+    "present": "Present"
+  },
+  "education": {
+    "title": "Education",
+    "subtitle": "My academic background"
+  },
+  "contact": {
+    "title": "Contact",
+    "subtitle": "Let's connect",
+    "email_me": "Email Me",
+    "find_me": "Find me on"
+  },
+  "footer": {
+    "built_with": "Built with",
+    "rights": "All rights reserved"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "admin": {
+    "login": "Admin Login",
+    "email": "Email",
+    "password": "Password",
+    "sign_in": "Sign In",
+    "sign_out": "Sign Out",
+    "dashboard": "Dashboard",
+    "save": "Save Changes",
+    "add": "Add New",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm_delete": "Are you sure you want to delete this item?",
+    "saved": "Changes saved successfully!",
+    "error": "An error occurred. Please try again.",
+    "manage": "Manage",
+    "back_to_site": "Back to Site"
+  }
+}

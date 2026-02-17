@@ -1,0 +1,79 @@
+.projectsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+}
+
+.projectCard {
+    display: flex;
+    flex-direction: column;
+}
+
+.projectCard .cardContent {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.projectImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.projectImagePlaceholder {
+    width: 100%;
+    height: 200px;
+    background: var(--bg-code);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+}
+
+.featuredBadge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.projectTitle {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.projectDesc {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: 1rem;
+    flex: 1;
+    line-height: 1.6;
+}
+
+.techStack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.projectLinks {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: auto;
+}
+
+@media (max-width: 480px) {
+    .projectsGrid {
+        grid-template-columns: 1fr;
+    }
+}
