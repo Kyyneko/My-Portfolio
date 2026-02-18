@@ -50,9 +50,7 @@ export default function Hero({ profile }) {
     const [loaded, setLoaded] = useState(false);
     const [showScroll, setShowScroll] = useState(true);
 
-    const roleTitles = lang === 'en'
-        ? ['AI-Powered Full Stack Developer', 'ML Enthusiast', 'UI/UX Designer', 'Lab Coordinator']
-        : ['AI-Powered Full Stack Developer', 'Penggemar Machine Learning', 'Desainer UI/UX', 'Koordinator Laboratorium'];
+    const roleTitles = ['AI-Powered Full Stack Developer'];
 
     useEffect(() => {
         setLoaded(true);
