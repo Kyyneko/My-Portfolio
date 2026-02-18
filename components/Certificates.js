@@ -4,7 +4,7 @@ import { Award, ExternalLink } from 'lucide-react';
 import styles from './Certificates.module.css';
 
 export default function Certificates({ certificates }) {
-    const { t } = useLanguage();
+    const { t, lang } = useLanguage();
 
     return (
         <section id="certificates" className="section">
@@ -38,22 +38,26 @@ export default function Certificates({ certificates }) {
 
                             {/* Certificate info */}
                             <div className={styles.certInfo}>
-                                <h3 className={styles.certTitle}>{cert.title}</h3>
-                                <p className={styles.certIssuer}>{cert.issuer}</p>
-                                <p className={styles.certDate}>
-                                    {new Date(cert.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
-                                </p>
+                                <div>
+                                    <h3 className={styles.certTitle}>{cert.title}</h3>
+                                    <p className={styles.certIssuer}>{cert.issuer}</p>
+                                    <p className={styles.certDate}>
+                                        {new Date(cert.date).toLocaleDateString(lang === 'id' ? 'id-ID' : 'en-US', { year: 'numeric', month: 'long' })}
+                                    </p>
+                                </div>
 
                                 {cert.credential_url && cert.credential_url !== '#' && (
-                                    <a
-                                        href={cert.credential_url}
-                                        className={styles.certLink}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        <ExternalLink size={13} />
-                                        <span>{t('certificates.view_credential')}</span>
-                                    </a>
+                                    <div className={styles.certFooter}>
+                                        <a
+                                            href={cert.credential_url}
+                                            className={styles.certLink}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
+                                            <span>{t('certificates.view_credential')}</span>
+                                            <ExternalLink size={14} />
+                                        </a>
+                                    </div>
                                 )}
                             </div>
                         </div>
