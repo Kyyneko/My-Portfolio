@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { getEducation, upsertEducation, deleteEducation } from '@/lib/data';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { getEducation, upsertEducation, deleteEducation, bulkDelete } from '@/lib/data';
+import { Plus, Pencil, Trash2, Search, Check, X } from 'lucide-react';
 import TranslateButton from '@/components/TranslateButton';
+import { useConfirm } from '@/components/ConfirmDialog';
 import styles from '../admin.module.css';
 
 const empty = {
@@ -15,6 +16,9 @@ export default function AdminEducation() {
     const [editing, setEditing] = useState(null);
     const [toast, setToast] = useState('');
     const [saving, setSaving] = useState(false);
+    const [search, setSearch] = useState('');
+    const [selected, setSelected] = useState(new Set());
+    const confirm = useConfirm();
 
     const load = () => getEducation().then(setItems);
     useEffect(() => { load(); }, []);
@@ -26,12 +30,47 @@ export default function AdminEducation() {
     };
 
     const remove = async (id) => {
-        if (!confirm('Delete this entry?')) return;
+        const yes = await confirm('Are you sure you want to delete this education entry? This action cannot be undone.');
+        if (!yes) return;
         try { await deleteEducation(id); await load(); setToast('Deleted.'); setTimeout(() => setToast(''), 3000); }
         catch (err) { setToast('Error: ' + err.message); }
     };
 
+    const bulkRemove = async () => {
+        const yes = await confirm(`Delete ${selected.size} selected education entry(s)? This action cannot be undone.`);
+        if (!yes) return;
+        try {
+            await bulkDelete('education', [...selected]);
+            setSelected(new Set());
+            await load();
+            setToast(`${selected.size} education entry(s) deleted.`);
+            setTimeout(() => setToast(''), 3000);
+        } catch (err) { setToast('Error: ' + err.message); }
+    };
+
+    const toggleSelect = (id) => {
+        setSelected(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selected.size === filtered.length) setSelected(new Set());
+        else setSelected(new Set(filtered.map(i => i.id)));
+    };
+
     const update = (key, val) => setEditing(prev => ({ ...prev, [key]: val }));
+
+    // Filter
+    const filtered = items.filter(e =>
+        e.institution?.toLowerCase().includes(search.toLowerCase()) ||
+        e.degree_en?.toLowerCase().includes(search.toLowerCase()) ||
+        e.degree_id?.toLowerCase().includes(search.toLowerCase()) ||
+        e.field_en?.toLowerCase().includes(search.toLowerCase()) ||
+        e.field_id?.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <div>
@@ -40,9 +79,33 @@ export default function AdminEducation() {
                 <button className="btn btn-primary" onClick={() => setEditing({ ...empty })}><Plus size={18} /> Add Education</button>
             </div>
 
+            {/* Toolbar */}
+            <div className={styles.toolbar}>
+                <div className={styles.searchBox}>
+                    <Search size={16} className={styles.searchIcon} />
+                    <input className={styles.searchInput} placeholder="Search education..." value={search} onChange={e => setSearch(e.target.value)} />
+                </div>
+                {items.length > 0 && (
+                    <button className={`${styles.checkbox} ${selected.size === filtered.length && filtered.length > 0 ? styles.checkboxChecked : ''}`} onClick={toggleSelectAll} title="Select all">
+                        {selected.size === filtered.length && filtered.length > 0 && <Check size={14} color="#fff" />}
+                    </button>
+                )}
+            </div>
+
+            {selected.size > 0 && (
+                <div className={styles.bulkBar}>
+                    <span className={styles.bulkCount}>{selected.size}</span> selected
+                    <button className="btn btn-danger btn-sm" onClick={bulkRemove} style={{ marginLeft: 'auto' }}><Trash2 size={14} /> Delete Selected</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setSelected(new Set())}><X size={14} /> Clear</button>
+                </div>
+            )}
+
             <div className={styles.itemList}>
-                {items.map(item => (
-                    <div key={item.id} className={styles.itemRow}>
+                {filtered.map(item => (
+                    <div key={item.id} className={`${styles.itemRow} ${selected.has(item.id) ? styles.itemRowSelected : ''}`}>
+                        <button className={`${styles.checkbox} ${selected.has(item.id) ? styles.checkboxChecked : ''}`} onClick={() => toggleSelect(item.id)}>
+                            {selected.has(item.id) && <Check size={14} color="#fff" />}
+                        </button>
                         <div className={styles.itemRowInfo}>
                             <div className={styles.itemRowTitle}>{item.degree_en || item.degree_id} — {item.field_en || item.field_id}</div>
                             <div className={styles.itemRowSub}>{item.institution} · {item.start_year}–{item.end_year}</div>
@@ -53,7 +116,7 @@ export default function AdminEducation() {
                         </div>
                     </div>
                 ))}
-                {items.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No education entries yet.</p>}
+                {filtered.length === 0 && <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>{search ? 'No education matches your search.' : 'No education entries yet.'}</p>}
             </div>
 
             {editing && (
@@ -66,7 +129,6 @@ export default function AdminEducation() {
                                 <input className="form-input" value={editing.institution} onChange={e => update('institution', e.target.value)} />
                             </div>
 
-                            {/* Degree ID → EN */}
                             <div className="form-group">
                                 <label className="form-label">Degree (ID) 🇮🇩</label>
                                 <input className="form-input" value={editing.degree_id} onChange={e => update('degree_id', e.target.value)} placeholder="e.g. Sarjana (S1)" />
@@ -79,7 +141,6 @@ export default function AdminEducation() {
                                 <input className="form-input" value={editing.degree_en} onChange={e => update('degree_en', e.target.value)} placeholder="e.g. Bachelor of Science" />
                             </div>
 
-                            {/* Field ID → EN */}
                             <div className="form-group">
                                 <label className="form-label">Field of Study (ID) 🇮🇩</label>
                                 <input className="form-input" value={editing.field_id} onChange={e => update('field_id', e.target.value)} placeholder="e.g. Sistem Informasi" />
@@ -95,7 +156,6 @@ export default function AdminEducation() {
                             <div className="form-group"><label className="form-label">Start Year</label><input type="number" className="form-input" value={editing.start_year} onChange={e => update('start_year', parseInt(e.target.value) || 0)} /></div>
                             <div className="form-group"><label className="form-label">End Year</label><input type="number" className="form-input" value={editing.end_year} onChange={e => update('end_year', parseInt(e.target.value) || 0)} /></div>
 
-                            {/* Description ID → EN */}
                             <div className={`form-group ${styles.formFull}`}>
                                 <label className="form-label">Description (ID) 🇮🇩</label>
                                 <textarea className="form-textarea" value={editing.description_id} onChange={e => update('description_id', e.target.value)} placeholder="Deskripsi dalam Bahasa Indonesia" />

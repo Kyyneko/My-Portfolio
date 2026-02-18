@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { getProjects, upsertProject, deleteProject } from '@/lib/data';
-import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { getProjects, upsertProject, deleteProject, bulkDelete } from '@/lib/data';
+import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, Search, Check } from 'lucide-react';
 import TranslateButton from '@/components/TranslateButton';
+import { useConfirm } from '@/components/ConfirmDialog';
+import ImageCropper from '@/components/ImageCropper';
 import styles from '../admin.module.css';
 
 const emptyProject = {
@@ -18,7 +20,11 @@ export default function AdminProjects() {
     const [toast, setToast] = useState('');
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [search, setSearch] = useState('');
+    const [selected, setSelected] = useState(new Set());
     const fileInputRef = useRef(null);
+    const [cropSrc, setCropSrc] = useState(null);
+    const confirm = useConfirm();
 
     const load = () => getProjects().then(setItems);
     useEffect(() => { load(); }, []);
@@ -32,65 +38,86 @@ export default function AdminProjects() {
         try {
             const data = { ...editing, tech_stack: techInput.split(',').map(s => s.trim()).filter(Boolean) };
             await upsertProject(data);
-            await load();
-            close();
+            await load(); close();
             setToast('Project saved!');
             setTimeout(() => setToast(''), 3000);
-        } catch (err) {
-            setToast('Error: ' + err.message);
-        } finally { setSaving(false); }
+        } catch (err) { setToast('Error: ' + err.message); }
+        finally { setSaving(false); }
     };
 
     const remove = async (id) => {
-        if (!confirm('Are you sure you want to delete this project?')) return;
+        const yes = await confirm('Are you sure you want to delete this project? This action cannot be undone.');
+        if (!yes) return;
+        try { await deleteProject(id); await load(); setToast('Project deleted.'); setTimeout(() => setToast(''), 3000); }
+        catch (err) { setToast('Error: ' + err.message); }
+    };
+
+    const bulkRemove = async () => {
+        const yes = await confirm(`Delete ${selected.size} selected project(s)? This action cannot be undone.`);
+        if (!yes) return;
         try {
-            await deleteProject(id);
+            await bulkDelete('projects', [...selected]);
+            setSelected(new Set());
             await load();
-            setToast('Project deleted.');
+            setToast(`${selected.size} project(s) deleted.`);
             setTimeout(() => setToast(''), 3000);
         } catch (err) { setToast('Error: ' + err.message); }
     };
 
+    const toggleSelect = (id) => {
+        setSelected(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selected.size === filtered.length) setSelected(new Set());
+        else setSelected(new Set(filtered.map(i => i.id)));
+    };
+
     const update = (key, val) => setEditing(prev => ({ ...prev, [key]: val }));
 
-    // ─── Photo Upload ───
-    const handleFileUpload = async (file) => {
+    // Step 1: File selected → open cropper
+    const handleFileSelect = (file) => {
         if (!file) return;
-        if (!file.type.startsWith('image/')) {
-            setToast('Error: Please upload an image file');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            setToast('Error: File size must be less than 5MB');
-            return;
-        }
+        if (!file.type.startsWith('image/')) { setToast('Error: Please upload an image file'); return; }
+        if (file.size > 5 * 1024 * 1024) { setToast('Error: File size must be less than 5MB'); return; }
+        const reader = new FileReader();
+        reader.onload = () => setCropSrc(reader.result);
+        reader.readAsDataURL(file);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
+    // Step 2: Crop complete → upload
+    const handleCropComplete = async (blob) => {
+        setCropSrc(null);
         setUploading(true);
         try {
+            const file = new File([blob], 'project.jpg', { type: 'image/jpeg' });
             const formData = new FormData();
             formData.append('file', file);
             formData.append('folder', 'projects');
-
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
+            if (editing?.image_url) formData.append('oldUrl', editing.image_url);
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-
             update('image_url', data.url);
             setToast('Image uploaded!');
             setTimeout(() => setToast(''), 3000);
-        } catch (err) {
-            setToast('Error: ' + err.message);
-        } finally {
-            setUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        }
+        } catch (err) { setToast('Error: ' + err.message); }
+        finally { setUploading(false); }
     };
 
     const removeImage = () => update('image_url', '');
+
+    // Filter
+    const filtered = items.filter(p =>
+        p.title_en?.toLowerCase().includes(search.toLowerCase()) ||
+        p.title_id?.toLowerCase().includes(search.toLowerCase()) ||
+        (p.tech_stack || []).some(t => t.toLowerCase().includes(search.toLowerCase()))
+    );
 
     return (
         <div>
@@ -99,27 +126,37 @@ export default function AdminProjects() {
                 <button className="btn btn-primary" onClick={openNew}><Plus size={18} /> Add Project</button>
             </div>
 
+            {/* Toolbar */}
+            <div className={styles.toolbar}>
+                <div className={styles.searchBox}>
+                    <Search size={16} className={styles.searchIcon} />
+                    <input className={styles.searchInput} placeholder="Search projects..." value={search} onChange={e => setSearch(e.target.value)} />
+                </div>
+                {items.length > 0 && (
+                    <button className={`${styles.checkbox} ${selected.size === filtered.length && filtered.length > 0 ? styles.checkboxChecked : ''}`} onClick={toggleSelectAll} title="Select all">
+                        {selected.size === filtered.length && filtered.length > 0 && <Check size={14} color="#fff" />}
+                    </button>
+                )}
+            </div>
+
+            {selected.size > 0 && (
+                <div className={styles.bulkBar}>
+                    <span className={styles.bulkCount}>{selected.size}</span> selected
+                    <button className="btn btn-danger btn-sm" onClick={bulkRemove} style={{ marginLeft: 'auto' }}><Trash2 size={14} /> Delete Selected</button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setSelected(new Set())}><X size={14} /> Clear</button>
+                </div>
+            )}
+
             <div className={styles.itemList}>
-                {items.map(item => (
-                    <div key={item.id} className={styles.itemRow}>
-                        {/* Thumbnail */}
+                {filtered.map(item => (
+                    <div key={item.id} className={`${styles.itemRow} ${selected.has(item.id) ? styles.itemRowSelected : ''}`}>
+                        <button className={`${styles.checkbox} ${selected.has(item.id) ? styles.checkboxChecked : ''}`} onClick={() => toggleSelect(item.id)}>
+                            {selected.has(item.id) && <Check size={14} color="#fff" />}
+                        </button>
                         {item.image_url && item.image_url !== '' && item.image_url !== '#' ? (
-                            <img
-                                src={item.image_url}
-                                alt={item.title_en}
-                                style={{
-                                    width: 48, height: 48, objectFit: 'cover',
-                                    borderRadius: '8px', flexShrink: 0,
-                                    border: '1px solid var(--border-color)',
-                                }}
-                            />
+                            <img src={item.image_url} alt={item.title_en} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: '1px solid var(--border-color)' }} />
                         ) : (
-                            <div style={{
-                                width: 48, height: 48, borderRadius: '8px',
-                                background: 'rgba(96,165,250,0.1)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'var(--text-muted)', flexShrink: 0,
-                            }}>
+                            <div style={{ width: 48, height: 48, borderRadius: '8px', background: 'rgba(96,165,250,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', flexShrink: 0 }}>
                                 <ImageIcon size={20} />
                             </div>
                         )}
@@ -137,95 +174,37 @@ export default function AdminProjects() {
                         </div>
                     </div>
                 ))}
-                {items.length === 0 && (
+                {filtered.length === 0 && (
                     <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
-                        No projects yet.
+                        {search ? 'No projects match your search.' : 'No projects yet.'}
                     </p>
-                )}</div>
+                )}
+            </div>
 
             {editing && (
                 <div className={styles.modal} onClick={close}>
                     <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
                         <h2 className={styles.modalTitle}>{editing.id ? 'Edit Project' : 'New Project'}</h2>
                         <div className={styles.formGrid}>
-                            {/* ─── Photo Upload ─── */}
+                            {/* Photo Upload */}
                             <div className={`form-group ${styles.formFull}`}>
                                 <label className="form-label">Project Image</label>
                                 {editing.image_url && editing.image_url !== '' ? (
-                                    <div style={{
-                                        position: 'relative', display: 'inline-block',
-                                        borderRadius: '10px', overflow: 'hidden',
-                                        border: '1px solid var(--border-color)',
-                                        maxWidth: '100%',
-                                    }}>
-                                        <img
-                                            src={editing.image_url}
-                                            alt="Preview"
-                                            style={{
-                                                display: 'block', maxWidth: '100%',
-                                                maxHeight: '200px', objectFit: 'cover',
-                                            }}
-                                        />
-                                        <div style={{
-                                            position: 'absolute', top: 0, right: 0,
-                                            display: 'flex', gap: '0.25rem', padding: '0.35rem',
-                                        }}>
-                                            <button
-                                                type="button"
-                                                onClick={() => fileInputRef.current?.click()}
-                                                style={{
-                                                    background: 'rgba(0,0,0,0.6)', border: 'none',
-                                                    color: '#fff', borderRadius: '6px',
-                                                    padding: '0.3rem 0.5rem', cursor: 'pointer',
-                                                    fontSize: '0.7rem', fontWeight: 600,
-                                                }}
-                                            >
-                                                Replace
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={removeImage}
-                                                style={{
-                                                    background: 'rgba(220,50,50,0.8)', border: 'none',
-                                                    color: '#fff', borderRadius: '6px',
-                                                    width: 26, height: 26, cursor: 'pointer',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                }}
-                                            >
-                                                <X size={14} />
-                                            </button>
+                                    <div style={{ position: 'relative', display: 'inline-block', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)', maxWidth: '100%' }}>
+                                        <img src={editing.image_url} alt="Preview" style={{ display: 'block', maxWidth: '100%', maxHeight: '200px', objectFit: 'cover' }} />
+                                        <div style={{ position: 'absolute', top: 0, right: 0, display: 'flex', gap: '0.25rem', padding: '0.35rem' }}>
+                                            <button type="button" onClick={() => fileInputRef.current?.click()} style={{ background: 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', borderRadius: '6px', padding: '0.3rem 0.5rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 600 }}>Replace</button>
+                                            <button type="button" onClick={removeImage} style={{ background: 'rgba(220,50,50,0.8)', border: 'none', color: '#fff', borderRadius: '6px', width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div
-                                        onClick={() => !uploading && fileInputRef.current?.click()}
-                                        onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--accent-primary)'; }}
-                                        onDragLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
-                                        onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--border-color)'; handleFileUpload(e.dataTransfer.files[0]); }}
-                                        style={{
-                                            border: '2px dashed var(--border-color)',
-                                            borderRadius: '10px', padding: '1.5rem',
-                                            textAlign: 'center', cursor: uploading ? 'wait' : 'pointer',
-                                            background: 'rgba(96,165,250,0.03)',
-                                            transition: 'all 0.2s ease',
-                                        }}
-                                    >
+                                    <div onClick={() => !uploading && fileInputRef.current?.click()} onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--accent-primary)'; }} onDragLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; }} onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--border-color)'; handleFileSelect(e.dataTransfer.files[0]); }} style={{ border: '2px dashed var(--border-color)', borderRadius: '10px', padding: '1.5rem', textAlign: 'center', cursor: uploading ? 'wait' : 'pointer', background: 'rgba(96,165,250,0.03)', transition: 'all 0.2s ease' }}>
                                         <Upload size={28} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>
-                                            {uploading ? 'Uploading...' : 'Click or drag & drop project screenshot'}
-                                        </p>
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                                            PNG, JPG up to 5MB
-                                        </p>
+                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>{uploading ? 'Uploading...' : 'Click or drag & drop project screenshot'}</p>
+                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>PNG, JPG up to 5MB</p>
                                     </div>
                                 )}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    style={{ display: 'none' }}
-                                    onChange={e => handleFileUpload(e.target.files[0])}
-                                />
+                                <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFileSelect(e.target.files[0])} />
                             </div>
 
                             {/* Title ID → EN */}
@@ -273,6 +252,15 @@ export default function AdminProjects() {
                 </div>
             )}
 
+            {cropSrc && (
+                <ImageCropper
+                    imageSrc={cropSrc}
+                    onCropComplete={handleCropComplete}
+                    onCancel={() => setCropSrc(null)}
+                    aspect={16 / 9}
+                    cropShape="rect"
+                />
+            )}
             {toast && <div className={`toast ${toast.startsWith('Error') ? 'toast-error' : 'toast-success'}`}>{toast}</div>}
         </div>
     );

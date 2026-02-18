@@ -5,6 +5,7 @@ import { getSession, onAuthStateChange, signOut } from '@/lib/data';
 import { LanguageProvider } from '@/lib/i18n';
 import { ThemeProvider, useTheme } from '@/lib/theme';
 import { User, FolderOpen, Award, Briefcase, GraduationCap, Code, ArrowLeft, LogOut, LayoutDashboard, Sun, Moon, FileDown } from 'lucide-react';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import Link from 'next/link';
 import styles from './admin.module.css';
 
@@ -112,6 +113,7 @@ function AdminShell({ children }) {
             <main className={styles.content}>
                 {children}
             </main>
+            <ConfirmDialog />
         </div>
     );
 }

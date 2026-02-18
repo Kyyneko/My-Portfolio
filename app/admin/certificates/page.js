@@ -1,7 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { getCertificates, upsertCertificate, deleteCertificate } from '@/lib/data';
-import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { getCertificates, upsertCertificate, deleteCertificate, bulkDelete } from '@/lib/data';
+import { Plus, Pencil, Trash2, Upload, X, Image as ImageIcon, Search, Check } from 'lucide-react';
+import { useConfirm } from '@/components/ConfirmDialog';
+import ImageCropper from '@/components/ImageCropper';
 import styles from '../admin.module.css';
 
 const empty = { title: '', issuer: '', date: '', credential_url: '', image_url: '', sort_order: 0 };
@@ -12,7 +14,11 @@ export default function AdminCertificates() {
     const [toast, setToast] = useState('');
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [search, setSearch] = useState('');
+    const [selected, setSelected] = useState(new Set());
     const fileInputRef = useRef(null);
+    const [cropSrc, setCropSrc] = useState(null);
+    const confirm = useConfirm();
 
     const load = () => getCertificates().then(setItems);
     useEffect(() => { load(); }, []);
@@ -33,7 +39,8 @@ export default function AdminCertificates() {
     };
 
     const remove = async (id) => {
-        if (!confirm('Delete this certificate?')) return;
+        const yes = await confirm('Are you sure you want to delete this certificate? This action cannot be undone.');
+        if (!yes) return;
         try {
             await deleteCertificate(id);
             await load();
@@ -44,53 +51,71 @@ export default function AdminCertificates() {
         }
     };
 
+    const bulkRemove = async () => {
+        const yes = await confirm(`Delete ${selected.size} selected certificate(s)? This action cannot be undone.`);
+        if (!yes) return;
+        try {
+            await bulkDelete('certificates', [...selected]);
+            setSelected(new Set());
+            await load();
+            setToast(`${selected.size} certificate(s) deleted.`);
+            setTimeout(() => setToast(''), 3000);
+        } catch (err) { setToast('Error: ' + err.message); }
+    };
+
+    const toggleSelect = (id) => {
+        setSelected(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selected.size === filtered.length) setSelected(new Set());
+        else setSelected(new Set(filtered.map(i => i.id)));
+    };
+
     const update = (key, val) => setEditing(prev => ({ ...prev, [key]: val }));
 
-    const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
+    // Step 1: File selected → open cropper
+    const handleFileSelect = (file) => {
         if (!file) return;
+        if (!file.type.startsWith('image/')) { setToast('Error: Please upload an image file'); return; }
+        if (file.size > 5 * 1024 * 1024) { setToast('Error: File size must be less than 5MB'); return; }
+        const reader = new FileReader();
+        reader.onload = () => setCropSrc(reader.result);
+        reader.readAsDataURL(file);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            setToast('Error: Please upload an image file');
-            return;
-        }
-
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            setToast('Error: File size must be less than 5MB');
-            return;
-        }
-
+    // Step 2: Crop complete → upload
+    const handleCropComplete = async (blob) => {
+        setCropSrc(null);
         setUploading(true);
         try {
+            const file = new File([blob], 'certificate.jpg', { type: 'image/jpeg' });
             const formData = new FormData();
             formData.append('file', file);
             formData.append('folder', 'certificates');
-
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
+            if (editing?.image_url) formData.append('oldUrl', editing.image_url);
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-
             update('image_url', data.url);
             setToast('Image uploaded!');
             setTimeout(() => setToast(''), 3000);
-        } catch (err) {
-            setToast('Error: ' + err.message);
-        } finally {
-            setUploading(false);
-            // Reset file input
-            if (fileInputRef.current) fileInputRef.current.value = '';
-        }
+        } catch (err) { setToast('Error: ' + err.message); }
+        finally { setUploading(false); }
     };
 
-    const removeImage = () => {
-        update('image_url', '');
-    };
+    const removeImage = () => update('image_url', '');
+
+    // Filter
+    const filtered = items.filter(c =>
+        c.title?.toLowerCase().includes(search.toLowerCase()) ||
+        c.issuer?.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
         <div>
@@ -101,26 +126,54 @@ export default function AdminCertificates() {
                 </button>
             </div>
 
+            {/* Toolbar */}
+            <div className={styles.toolbar}>
+                <div className={styles.searchBox}>
+                    <Search size={16} className={styles.searchIcon} />
+                    <input
+                        className={styles.searchInput}
+                        placeholder="Search certificates..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                    />
+                </div>
+                {items.length > 0 && (
+                    <button
+                        className={`${styles.checkbox} ${selected.size === filtered.length && filtered.length > 0 ? styles.checkboxChecked : ''}`}
+                        onClick={toggleSelectAll}
+                        title="Select all"
+                    >
+                        {selected.size === filtered.length && filtered.length > 0 && <Check size={14} color="#fff" />}
+                    </button>
+                )}
+            </div>
+
+            {/* Bulk action bar */}
+            {selected.size > 0 && (
+                <div className={styles.bulkBar}>
+                    <span className={styles.bulkCount}>{selected.size}</span> selected
+                    <button className="btn btn-danger btn-sm" onClick={bulkRemove} style={{ marginLeft: 'auto' }}>
+                        <Trash2 size={14} /> Delete Selected
+                    </button>
+                    <button className="btn btn-secondary btn-sm" onClick={() => setSelected(new Set())}>
+                        <X size={14} /> Clear
+                    </button>
+                </div>
+            )}
+
             <div className={styles.itemList}>
-                {items.map(item => (
-                    <div key={item.id} className={styles.itemRow}>
+                {filtered.map(item => (
+                    <div key={item.id} className={`${styles.itemRow} ${selected.has(item.id) ? styles.itemRowSelected : ''}`}>
+                        <button
+                            className={`${styles.checkbox} ${selected.has(item.id) ? styles.checkboxChecked : ''}`}
+                            onClick={() => toggleSelect(item.id)}
+                        >
+                            {selected.has(item.id) && <Check size={14} color="#fff" />}
+                        </button>
                         {item.image_url && item.image_url !== '' && item.image_url !== '#' ? (
-                            <img
-                                src={item.image_url}
-                                alt={item.title}
-                                style={{
-                                    width: 48, height: 48, objectFit: 'cover',
-                                    borderRadius: '8px', flexShrink: 0,
-                                    border: '1px solid var(--border-color)',
-                                }}
-                            />
+                            <img src={item.image_url} alt={item.title} style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: '1px solid var(--border-color)' }} />
                         ) : (
-                            <div style={{
-                                width: 48, height: 48, borderRadius: '8px',
-                                background: 'rgba(96,165,250,0.1)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: 'var(--text-muted)', flexShrink: 0,
-                            }}>
+                            <div style={{ width: 48, height: 48, borderRadius: '8px', background: 'rgba(96,165,250,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', flexShrink: 0 }}>
                                 <ImageIcon size={20} />
                             </div>
                         )}
@@ -134,9 +187,9 @@ export default function AdminCertificates() {
                         </div>
                     </div>
                 ))}
-                {items.length === 0 && (
+                {filtered.length === 0 && (
                     <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
-                        No certificates yet.
+                        {search ? 'No certificates match your search.' : 'No certificates yet.'}
                     </p>
                 )}
             </div>
@@ -157,7 +210,7 @@ export default function AdminCertificates() {
                             </div>
                             <div className="form-group">
                                 <label className="form-label">Date</label>
-                                <input type="month" className="form-input" value={editing.date} onChange={e => update('date', e.target.value)} />
+                                <input type="date" className="form-input" value={editing.date} onChange={e => update('date', e.target.value)} />
                             </div>
                             <div className={`form-group ${styles.formFull}`}>
                                 <label className="form-label">Credential URL (link to verify certificate)</label>
@@ -167,73 +220,31 @@ export default function AdminCertificates() {
                             {/* Photo Upload */}
                             <div className={`form-group ${styles.formFull}`}>
                                 <label className="form-label">Certificate Photo</label>
-
                                 {editing.image_url && editing.image_url !== '' ? (
                                     <div style={{ position: 'relative', display: 'inline-block', marginBottom: '0.75rem' }}>
-                                        <img
-                                            src={editing.image_url}
-                                            alt="Certificate preview"
-                                            style={{
-                                                maxWidth: '100%', maxHeight: '220px',
-                                                borderRadius: '12px', objectFit: 'contain',
-                                                border: '1px solid var(--border-color)',
-                                                background: 'var(--bg-secondary)',
-                                                display: 'block',
-                                            }}
-                                        />
-                                        <button
-                                            onClick={removeImage}
-                                            style={{
-                                                position: 'absolute', top: '8px', right: '8px',
-                                                width: '28px', height: '28px', borderRadius: '50%',
-                                                background: 'rgba(248,113,113,0.9)', border: 'none',
-                                                color: 'white', cursor: 'pointer',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            }}
-                                            title="Remove image"
-                                        >
+                                        <img src={editing.image_url} alt="Certificate preview" style={{ maxWidth: '100%', maxHeight: '220px', borderRadius: '12px', objectFit: 'contain', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', display: 'block' }} />
+                                        <button onClick={removeImage} style={{ position: 'absolute', top: '8px', right: '8px', width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(248,113,113,0.9)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Remove image">
                                             <X size={14} />
                                         </button>
                                     </div>
                                 ) : (
                                     <div
-                                        onClick={() => fileInputRef.current?.click()}
-                                        style={{
-                                            border: '2px dashed var(--border-color)',
-                                            borderRadius: '12px',
-                                            padding: '2rem',
-                                            textAlign: 'center',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s ease',
-                                            background: 'var(--bg-secondary)',
-                                        }}
-                                        onMouseOver={e => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
-                                        onMouseOut={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                                        onClick={() => !uploading && fileInputRef.current?.click()}
+                                        onDragOver={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--accent-primary)'; }}
+                                        onDragLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                                        onDrop={e => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--border-color)'; handleFileSelect(e.dataTransfer.files[0]); }}
+                                        style={{ border: '2px dashed var(--border-color)', borderRadius: '12px', padding: '2rem', textAlign: 'center', cursor: uploading ? 'wait' : 'pointer', transition: 'all 0.2s ease', background: 'var(--bg-secondary)' }}
                                     >
                                         <Upload size={32} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
                                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500 }}>
-                                            {uploading ? 'Uploading...' : 'Click to upload certificate photo'}
+                                            {uploading ? 'Uploading...' : 'Click or drag & drop certificate photo'}
                                         </p>
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                                            PNG, JPG, WEBP — Max 5MB
-                                        </p>
+                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>PNG, JPG, WEBP — Max 5MB</p>
                                     </div>
                                 )}
-
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    accept="image/*"
-                                    onChange={handleFileUpload}
-                                    style={{ display: 'none' }}
-                                />
-
+                                <input type="file" ref={fileInputRef} accept="image/*" onChange={e => handleFileSelect(e.target.files[0])} style={{ display: 'none' }} />
                                 {editing.image_url && (
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="btn btn-secondary"
-                                        style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}
-                                    >
+                                    <button onClick={() => fileInputRef.current?.click()} className="btn btn-secondary" style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
                                         <Upload size={14} /> Replace Photo
                                     </button>
                                 )}
@@ -254,7 +265,15 @@ export default function AdminCertificates() {
                 </div>
             )}
 
-            {/* Toast notification */}
+            {cropSrc && (
+                <ImageCropper
+                    imageSrc={cropSrc}
+                    onCropComplete={handleCropComplete}
+                    onCancel={() => setCropSrc(null)}
+                    aspect={4 / 3}
+                    cropShape="rect"
+                />
+            )}
             {toast && (
                 <div style={{
                     position: 'fixed', bottom: '1.5rem', right: '1.5rem',
