@@ -27,7 +27,7 @@ export default function Contact({ profile }) {
                             <div className={`${styles.contactIcon} ${link.style}`}>
                                 {link.icon}
                             </div>
-                            <div>
+                            <div className={styles.contactTextWrapper}>
                                 <div className={styles.contactLabel}>{link.label}</div>
                                 <div className={styles.contactValue}>{link.value}</div>
                             </div>

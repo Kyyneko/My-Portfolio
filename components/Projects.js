@@ -28,33 +28,37 @@ export default function Projects({ projects }) {
                                     )}
 
                                     {project.image_url ? (
-                                        <img src={project.image_url} alt={title} className={styles.projectImage} />
+                                        <div className={styles.projectImageWrapper}>
+                                            <img src={project.image_url} alt={title} className={styles.projectImage} />
+                                        </div>
                                     ) : (
                                         <div className={styles.projectImagePlaceholder}>
                                             <FolderOpen size={40} />
                                         </div>
                                     )}
 
-                                    <h3 className={styles.projectTitle}>{title}</h3>
-                                    <p className={styles.projectDesc}>{desc}</p>
+                                    <div className={styles.projectContentBody}>
+                                        <h3 className={styles.projectTitle}>{title}</h3>
+                                        <p className={styles.projectDesc}>{desc}</p>
 
-                                    <div className={styles.techStack}>
-                                        {(project.tech_stack || []).map((tech, i) => (
-                                            <span key={i} className="badge">{tech}</span>
-                                        ))}
-                                    </div>
+                                        <div className={styles.techStack}>
+                                            {(project.tech_stack || []).map((tech, i) => (
+                                                <span key={i} className="badge">{tech}</span>
+                                            ))}
+                                        </div>
 
-                                    <div className={styles.projectLinks}>
-                                        {project.live_url && project.live_url !== '#' && (
-                                            <a href={project.live_url} className="btn btn-outline btn-sm" target="_blank" rel="noreferrer">
-                                                <ExternalLink size={14} /> {t('projects.view_live')}
-                                            </a>
-                                        )}
-                                        {project.github_url && project.github_url !== '#' && (
-                                            <a href={project.github_url} className="btn btn-ghost btn-sm" target="_blank" rel="noreferrer">
-                                                <Github size={14} /> {t('projects.view_code')}
-                                            </a>
-                                        )}
+                                        <div className={styles.projectLinks}>
+                                            {project.live_url && project.live_url !== '#' && (
+                                                <a href={project.live_url} className="btn btn-outline btn-sm" target="_blank" rel="noreferrer">
+                                                    <ExternalLink size={14} /> {t('projects.view_live')}
+                                                </a>
+                                            )}
+                                            {project.github_url && project.github_url !== '#' && (
+                                                <a href={project.github_url} className="btn btn-ghost btn-sm" target="_blank" rel="noreferrer">
+                                                    <Github size={14} /> {t('projects.view_code')}
+                                                </a>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

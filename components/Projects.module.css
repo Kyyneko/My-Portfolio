@@ -7,6 +7,8 @@
 .projectCard {
     display: flex;
     flex-direction: column;
+    padding: 0 !important;
+    overflow: hidden;
 }
 
 .projectCard .cardContent {
@@ -17,32 +19,49 @@
     flex-direction: column;
 }
 
+/* Image area - full bleed */
+.projectImageWrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
 .projectImage {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
-    border-radius: var(--radius-md);
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
+    transition: transform 0.6s ease;
+}
+
+.projectCard:hover .projectImage {
+    transform: scale(1.05);
 }
 
 .projectImagePlaceholder {
     width: 100%;
-    height: 200px;
-    background: var(--bg-code);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    margin-bottom: 1rem;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.05), rgba(167, 139, 250, 0.05));
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
 }
 
+/* Content area with padding */
+.projectContentBody {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
 .featuredBadge {
     position: absolute;
     top: 1rem;
     right: 1rem;
+    z-index: 2;
 }
 
 .projectTitle {

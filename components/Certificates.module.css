@@ -9,6 +9,7 @@
     flex-direction: column;
     overflow: hidden;
     border-radius: 16px !important;
+    padding: 0 !important;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -42,18 +43,12 @@
 }
 
 /* Image area */
-/* Image area */
 .certImageWrapper {
     position: relative;
     width: 100%;
-    height: 200px;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
     background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border-subtle);
-    margin: -1px -1px 0 -1px;
-    /* Align with border */
-    width: calc(100% + 2px);
-    /* Compensate for card border */
 }
 
 .certImage {
@@ -104,7 +99,7 @@
 /* Placeholder when no image */
 .certImagePlaceholder {
     width: 100%;
-    height: 180px;
+    aspect-ratio: 16 / 9;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -112,7 +107,6 @@
     gap: 0.8rem;
     background: linear-gradient(135deg, rgba(96, 165, 250, 0.05), rgba(167, 139, 250, 0.05));
     color: var(--accent-primary);
-    border-bottom: 1px solid var(--border-subtle);
 }
 
 .certImagePlaceholder span {
