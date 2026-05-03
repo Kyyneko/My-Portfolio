@@ -16,6 +16,9 @@ export const metadata = {
     title: 'Mahendra Kirana | Backend Developer',
     description: 'Backend Developer Portfolio - Projects, Skills, and Experience',
   },
+  verification: {
+    google: 'o8XDy7Pt1RH7MTa3VsahYOKpXyl-G3DBqZRh-fQCV4k',
+  },
 };
 
 export default function RootLayout({ children }) {
