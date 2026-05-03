@@ -2,7 +2,8 @@ import { getProjectBySlug } from '@/lib/data';
 
 export async function generateMetadata({ params }) {
     try {
-        const project = await getProjectBySlug(params.slug);
+        const resolvedParams = await params;
+        const project = await getProjectBySlug(resolvedParams.slug);
         
         if (!project) {
             return {
