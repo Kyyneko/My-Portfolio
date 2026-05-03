@@ -9,6 +9,8 @@ import styles from '../admin.module.css';
 
 const emptyProject = {
     title_en: '', title_id: '', description_en: '', description_id: '',
+    long_description_en: '', long_description_id: '', tech_rationale_en: '', tech_rationale_id: '',
+    core_features_en: '', core_features_id: '',
     image_url: '', live_url: '', github_url: '', tech_stack: [],
     featured: false, sort_order: 0
 };
@@ -223,14 +225,53 @@ export default function AdminProjects() {
                             {/* Description ID → EN */}
                             <div className={`form-group ${styles.formFull}`}>
                                 <label className="form-label">Description (ID) 🇮🇩</label>
-                                <textarea className="form-textarea" value={editing.description_id} onChange={e => update('description_id', e.target.value)} placeholder="Deskripsi dalam Bahasa Indonesia" />
+                                <textarea className="form-textarea" value={editing.description_id} onChange={e => update('description_id', e.target.value)} placeholder="Deskripsi pendek dalam Bahasa Indonesia" />
                             </div>
                             <div className={`form-group ${styles.formFull}`}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
                                     <label className="form-label" style={{ margin: 0 }}>Description (EN) 🇺🇸</label>
                                     <TranslateButton sourceText={editing.description_id} onTranslated={(t) => update('description_en', t)} />
                                 </div>
-                                <textarea className="form-textarea" value={editing.description_en} onChange={e => update('description_en', e.target.value)} placeholder="Description in English" />
+                                <textarea className="form-textarea" value={editing.description_en} onChange={e => update('description_en', e.target.value)} placeholder="Short description in English" />
+                            </div>
+
+                            {/* Long Description ID → EN */}
+                            <div className={`form-group ${styles.formFull}`}>
+                                <label className="form-label">Long Description (ID) 🇮🇩</label>
+                                <textarea className="form-textarea" style={{ minHeight: '120px' }} value={editing.long_description_id} onChange={e => update('long_description_id', e.target.value)} placeholder="Penjelasan sangat rinci tentang proyek..." />
+                            </div>
+                            <div className={`form-group ${styles.formFull}`}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                                    <label className="form-label" style={{ margin: 0 }}>Long Description (EN) 🇺🇸</label>
+                                    <TranslateButton sourceText={editing.long_description_id} onTranslated={(t) => update('long_description_en', t)} />
+                                </div>
+                                <textarea className="form-textarea" style={{ minHeight: '120px' }} value={editing.long_description_en} onChange={e => update('long_description_en', e.target.value)} placeholder="Detailed explanation of the project..." />
+                            </div>
+
+                            {/* Tech Rationale ID → EN */}
+                            <div className={`form-group ${styles.formFull}`}>
+                                <label className="form-label">Tech Stack Rationale (ID) 🇮🇩</label>
+                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.tech_rationale_id} onChange={e => update('tech_rationale_id', e.target.value)} placeholder="Alasan memilih tech stack ini..." />
+                            </div>
+                            <div className={`form-group ${styles.formFull}`}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                                    <label className="form-label" style={{ margin: 0 }}>Tech Stack Rationale (EN) 🇺🇸</label>
+                                    <TranslateButton sourceText={editing.tech_rationale_id} onTranslated={(t) => update('tech_rationale_en', t)} />
+                                </div>
+                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.tech_rationale_en} onChange={e => update('tech_rationale_en', e.target.value)} placeholder="Reasons for choosing this tech stack..." />
+                            </div>
+
+                            {/* Core Features ID → EN */}
+                            <div className={`form-group ${styles.formFull}`}>
+                                <label className="form-label">Core Features (ID) 🇮🇩</label>
+                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.core_features_id} onChange={e => update('core_features_id', e.target.value)} placeholder="Alasan memakai fitur-fitur pokok..." />
+                            </div>
+                            <div className={`form-group ${styles.formFull}`}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                                    <label className="form-label" style={{ margin: 0 }}>Core Features (EN) 🇺🇸</label>
+                                    <TranslateButton sourceText={editing.core_features_id} onTranslated={(t) => update('core_features_en', t)} />
+                                </div>
+                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.core_features_en} onChange={e => update('core_features_en', e.target.value)} placeholder="Reasons for using core features..." />
                             </div>
 
                             <div className="form-group"><label className="form-label">Live URL</label><input className="form-input" value={editing.live_url} onChange={e => update('live_url', e.target.value)} placeholder="https://..." /></div>

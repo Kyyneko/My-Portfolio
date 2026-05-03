@@ -41,6 +41,12 @@ CREATE TABLE IF NOT EXISTS projects (
   title_id TEXT DEFAULT '',
   description_en TEXT DEFAULT '',
   description_id TEXT DEFAULT '',
+  long_description_en TEXT DEFAULT '',
+  long_description_id TEXT DEFAULT '',
+  tech_rationale_en TEXT DEFAULT '',
+  tech_rationale_id TEXT DEFAULT '',
+  core_features_en TEXT DEFAULT '',
+  core_features_id TEXT DEFAULT '',
   image_url TEXT DEFAULT '',
   live_url TEXT DEFAULT '',
   github_url TEXT DEFAULT '',
@@ -49,6 +55,14 @@ CREATE TABLE IF NOT EXISTS projects (
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Note: If the table already exists, run these in Supabase SQL Editor:
+-- ALTER TABLE projects ADD COLUMN long_description_en TEXT DEFAULT '';
+-- ALTER TABLE projects ADD COLUMN long_description_id TEXT DEFAULT '';
+-- ALTER TABLE projects ADD COLUMN tech_rationale_en TEXT DEFAULT '';
+-- ALTER TABLE projects ADD COLUMN tech_rationale_id TEXT DEFAULT '';
+-- ALTER TABLE projects ADD COLUMN core_features_en TEXT DEFAULT '';
+-- ALTER TABLE projects ADD COLUMN core_features_id TEXT DEFAULT '';
 
 -- 4. CERTIFICATES TABLE
 CREATE TABLE IF NOT EXISTS certificates (

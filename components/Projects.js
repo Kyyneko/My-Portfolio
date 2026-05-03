@@ -3,6 +3,8 @@ import { useLanguage } from '@/lib/i18n';
 import { ExternalLink, Github, FolderOpen, Star } from 'lucide-react';
 import styles from './Projects.module.css';
 
+import Link from 'next/link';
+
 export default function Projects({ projects }) {
     const { lang, t } = useLanguage();
 
@@ -28,17 +30,19 @@ export default function Projects({ projects }) {
                                     )}
 
                                     {project.image_url ? (
-                                        <div className={styles.projectImageWrapper}>
+                                        <Link href={`/projects/${project.id}`} className={styles.projectImageWrapper}>
                                             <img src={project.image_url} alt={title} className={styles.projectImage} />
-                                        </div>
+                                        </Link>
                                     ) : (
-                                        <div className={styles.projectImagePlaceholder}>
+                                        <Link href={`/projects/${project.id}`} className={styles.projectImagePlaceholder}>
                                             <FolderOpen size={40} />
-                                        </div>
+                                        </Link>
                                     )}
 
                                     <div className={styles.projectContentBody}>
-                                        <h3 className={styles.projectTitle}>{title}</h3>
+                                        <Link href={`/projects/${project.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                            <h3 className={styles.projectTitle}>{title}</h3>
+                                        </Link>
                                         <p className={styles.projectDesc}>{desc}</p>
 
                                         <div className={styles.techStack}>
@@ -48,6 +52,9 @@ export default function Projects({ projects }) {
                                         </div>
 
                                         <div className={styles.projectLinks}>
+                                            <Link href={`/projects/${project.id}`} className="btn btn-primary btn-sm">
+                                                {lang === 'en' ? 'Details' : 'Detail'}
+                                            </Link>
                                             {project.live_url && project.live_url !== '#' && (
                                                 <a href={project.live_url} className="btn btn-outline btn-sm" target="_blank" rel="noreferrer">
                                                     <ExternalLink size={14} /> {t('projects.view_live')}
