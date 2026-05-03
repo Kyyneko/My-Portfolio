@@ -1,13 +1,20 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Portfolio | Developer',
-  description: 'Full Stack Developer Portfolio - Projects, Skills, and Experience',
-  keywords: ['portfolio', 'developer', 'full stack', 'web developer', 'software engineer'],
+  title: 'Mahendra Kirana | Backend Developer',
+  description: 'Backend Developer Portfolio - Projects, Skills, and Experience of Mahendra Kirana M.B',
+  keywords: ['Mahendra Kirana', 'portfolio', 'backend developer', 'software engineer', 'API', 'database', 'Node.js', 'Go'],
   openGraph: {
-    title: 'Portfolio | Developer',
-    description: 'Full Stack Developer Portfolio - Projects, Skills, and Experience',
+    title: 'Mahendra Kirana | Backend Developer',
+    description: 'Backend Developer Portfolio - Projects, Skills, and Experience of Mahendra Kirana M.B',
     type: 'website',
+    locale: 'en_US',
+    siteName: 'Mahendra Kirana Portfolio',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Mahendra Kirana | Backend Developer',
+    description: 'Backend Developer Portfolio - Projects, Skills, and Experience',
   },
 };
 

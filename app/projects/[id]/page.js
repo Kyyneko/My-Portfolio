@@ -11,6 +11,7 @@ import ParticlesBg from '@/components/ParticlesBg';
 import { ArrowLeft, ExternalLink, Github, Star, Calendar, Layers, Code, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './page.module.css';
 import Link from 'next/link';
+import Image from 'next/image';
 
 function ProjectDetailContent() {
     const params = useParams();
@@ -124,11 +125,14 @@ function ProjectDetailContent() {
                     {allImages.length > 0 && (
                         <div className={styles.imageContainer}>
                             {allImages.map((img, idx) => (
-                                <img
+                                <Image
                                     key={idx}
                                     src={img}
                                     alt={`${title} - ${idx + 1}`}
+                                    fill
+                                    priority={idx === 0}
                                     className={`${styles.heroImage} ${idx === currentSlide ? styles.activeSlide : styles.inactiveSlide}`}
+                                    sizes="100vw"
                                 />
                             ))}
                             <div className={styles.imageOverlay}></div>

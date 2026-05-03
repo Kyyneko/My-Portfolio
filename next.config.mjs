@@ -1,6 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.in', // Also add supabase.in just in case
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      }
+    ],
+  },
 };
 
 export default nextConfig;

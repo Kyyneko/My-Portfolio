@@ -4,6 +4,7 @@ import { ExternalLink, Github, FolderOpen, Star } from 'lucide-react';
 import styles from './Projects.module.css';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Projects({ projects }) {
     const { lang, t } = useLanguage();
@@ -29,9 +30,15 @@ export default function Projects({ projects }) {
                                         </div>
                                     )}
 
-                                    {project.image_url ? (
+                                    {project.image_url && project.image_url !== '#' ? (
                                         <Link href={`/projects/${project.id}`} className={styles.projectImageWrapper}>
-                                            <img src={project.image_url} alt={title} className={styles.projectImage} />
+                                            <Image 
+                                                src={project.image_url} 
+                                                alt={title} 
+                                                fill
+                                                className={styles.projectImage} 
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                            />
                                         </Link>
                                     ) : (
                                         <Link href={`/projects/${project.id}`} className={styles.projectImagePlaceholder}>

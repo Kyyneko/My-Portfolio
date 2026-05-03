@@ -2,6 +2,7 @@
 import { useLanguage } from '@/lib/i18n';
 import { Award, ExternalLink } from 'lucide-react';
 import styles from './Certificates.module.css';
+import Image from 'next/image';
 
 export default function Certificates({ certificates }) {
     const { t, lang } = useLanguage();
@@ -20,10 +21,12 @@ export default function Certificates({ certificates }) {
                             {/* Certificate image preview */}
                             {cert.image_url && cert.image_url !== '' && cert.image_url !== '#' ? (
                                 <div className={styles.certImageWrapper}>
-                                    <img
+                                    <Image
                                         src={cert.image_url}
                                         alt={cert.title}
+                                        fill
                                         className={styles.certImage}
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                     />
                                     <div className={styles.certImageOverlay}>
                                         <Award size={20} />
