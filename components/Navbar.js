@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
 import { Sun, Moon, Menu, X } from 'lucide-react';
@@ -11,16 +12,30 @@ export default function Navbar() {
     const { lang, switchLanguage, t } = useLanguage();
     const { theme, toggleTheme } = useTheme();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const pathname = usePathname();
+    const router = useRouter();
 
     const scrollTo = (id) => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
         setMobileOpen(false);
+        if (pathname === '/') {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            router.push(`/#${id}`);
+        }
+    };
+
+    const handleLogoClick = () => {
+        if (pathname === '/') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            router.push('/');
+        }
     };
 
     return (
         <nav className={styles.navbar}>
             <div className={styles.navInner}>
-                <div className={styles.logo} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <div className={styles.logo} onClick={handleLogoClick}>
                     <span className={styles.logoAccent}>{'<'}</span>
                     Portfolio
                     <span className={styles.logoAccent}>{' />'}</span>
