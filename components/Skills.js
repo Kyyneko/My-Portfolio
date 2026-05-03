@@ -25,17 +25,13 @@ export default function Skills({ skills }) {
                     {Object.entries(grouped).map(([category, items]) => (
                         <div key={category} className="card">
                             <h3 className={styles.categoryTitle}>// {category}</h3>
-                            {items.map(skill => (
-                                <div key={skill.id} className={styles.skillItem}>
-                                    <div className={styles.skillHeader}>
-                                        <span className={styles.skillName}>{skill.name}</span>
-                                        <span className={styles.skillPercent}>{skill.proficiency}%</span>
+                            <div className={styles.skillTagsWrapper}>
+                                {items.map(skill => (
+                                    <div key={skill.id} className={styles.skillBadge}>
+                                        {skill.name}
                                     </div>
-                                    <div className="progress-bar">
-                                        <div className="progress-fill" style={{ width: `${skill.proficiency}%` }} />
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     ))}
                 </div>
