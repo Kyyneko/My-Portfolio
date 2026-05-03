@@ -40,6 +40,23 @@ function ProjectDetailContent() {
         fetchProject();
     }, [params?.id, router]);
 
+    const allImages = [];
+    if (project?.image_url && project.image_url !== '#') allImages.push(project.image_url);
+    if (project?.gallery_urls && project.gallery_urls.length > 0) {
+        allImages.push(...project.gallery_urls);
+    }
+
+    useEffect(() => {
+        if (allImages.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentSlide(prev => (prev + 1) % allImages.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [allImages.length]);
+
+    const nextSlide = () => setCurrentSlide(prev => (prev + 1) % allImages.length);
+    const prevSlide = () => setCurrentSlide(prev => (prev - 1 + allImages.length) % allImages.length);
+
     if (loading) {
         return (
             <div className={styles.loadingContainer}>
@@ -55,21 +72,6 @@ function ProjectDetailContent() {
     const longDesc = lang === 'en' ? project.long_description_en : project.long_description_id || project.long_description_en;
     const techRationale = lang === 'en' ? project.tech_rationale_en : project.tech_rationale_id || project.tech_rationale_en;
     const coreFeatures = lang === 'en' ? project.core_features_en : project.core_features_id || project.core_features_en;
-
-    const allImages = [];
-    if (project.image_url && project.image_url !== '#') allImages.push(project.image_url);
-    if (project.gallery_urls && project.gallery_urls.length > 0) {
-        allImages.push(...project.gallery_urls);
-    }
-
-    const nextSlide = () => setCurrentSlide(prev => (prev + 1) % allImages.length);
-    const prevSlide = () => setCurrentSlide(prev => (prev - 1 + allImages.length) % allImages.length);
-
-    useEffect(() => {
-        if (allImages.length <= 1) return;
-        const interval = setInterval(nextSlide, 5000);
-        return () => clearInterval(interval);
-    }, [allImages.length]);
 
     return (
         <main className={styles.main}>
