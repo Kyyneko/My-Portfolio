@@ -11,7 +11,7 @@ const emptyProject = {
     title_en: '', title_id: '', description_en: '', description_id: '',
     long_description_en: '', long_description_id: '', tech_rationale_en: '', tech_rationale_id: '',
     core_features_en: '', core_features_id: '',
-    image_url: '', live_url: '', github_url: '', tech_stack: [],
+    image_url: '', gallery_urls: [], live_url: '', github_url: '', tech_stack: [],
     featured: false, sort_order: 0
 };
 
@@ -25,6 +25,7 @@ export default function AdminProjects() {
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState(new Set());
     const fileInputRef = useRef(null);
+    const galleryFileInputRef = useRef(null);
     const [cropSrc, setCropSrc] = useState(null);
     const confirm = useConfirm();
 
@@ -92,7 +93,6 @@ export default function AdminProjects() {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    // Step 2: Crop complete → upload
     const handleCropComplete = async (blob) => {
         setCropSrc(null);
         setUploading(true);
@@ -113,6 +113,35 @@ export default function AdminProjects() {
     };
 
     const removeImage = () => update('image_url', '');
+
+    // Gallery upload handler
+    const handleGalleryUpload = async (file) => {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { setToast('Error: Please upload an image file'); return; }
+        if (file.size > 5 * 1024 * 1024) { setToast('Error: File size must be less than 5MB'); return; }
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'projects_gallery');
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            
+            const newGallery = [...(editing.gallery_urls || []), data.url];
+            update('gallery_urls', newGallery);
+            setToast('Gallery image added!');
+            setTimeout(() => setToast(''), 3000);
+        } catch (err) { setToast('Error: ' + err.message); }
+        finally { setUploading(false); }
+        if (galleryFileInputRef.current) galleryFileInputRef.current.value = '';
+    };
+
+    const removeGalleryImage = (index) => {
+        const newGallery = [...(editing.gallery_urls || [])];
+        newGallery.splice(index, 1);
+        update('gallery_urls', newGallery);
+    };
 
     // Filter
     const filtered = items.filter(p =>
@@ -190,7 +219,7 @@ export default function AdminProjects() {
                         <div className={styles.formGrid}>
                             {/* Photo Upload */}
                             <div className={`form-group ${styles.formFull}`}>
-                                <label className="form-label">Project Image</label>
+                                <label className="form-label">Project Image (Main)</label>
                                 {editing.image_url && editing.image_url !== '' ? (
                                     <div style={{ position: 'relative', display: 'inline-block', borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)', maxWidth: '100%' }}>
                                         <img src={editing.image_url} alt="Preview" style={{ display: 'block', maxWidth: '100%', maxHeight: '200px', objectFit: 'cover' }} />
@@ -207,6 +236,24 @@ export default function AdminProjects() {
                                     </div>
                                 )}
                                 <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleFileSelect(e.target.files[0])} />
+                            </div>
+
+                            {/* Gallery Upload */}
+                            <div className={`form-group ${styles.formFull}`}>
+                                <label className="form-label">Project Gallery (Optional)</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                                    {(editing.gallery_urls || []).map((url, idx) => (
+                                        <div key={idx} style={{ position: 'relative', width: '100px', height: '80px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                                            <img src={url} alt={`Gallery ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <button type="button" onClick={() => removeGalleryImage(idx)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(220,50,50,0.8)', border: 'none', color: '#fff', borderRadius: '4px', width: 20, height: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={12} /></button>
+                                        </div>
+                                    ))}
+                                    <div onClick={() => !uploading && galleryFileInputRef.current?.click()} style={{ width: '100px', height: '80px', borderRadius: '8px', border: '2px dashed var(--border-color)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: uploading ? 'wait' : 'pointer', background: 'rgba(96,165,250,0.03)' }}>
+                                        <Plus size={20} style={{ color: 'var(--text-muted)' }} />
+                                        <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Add Image</span>
+                                    </div>
+                                </div>
+                                <input ref={galleryFileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleGalleryUpload(e.target.files[0])} />
                             </div>
 
                             {/* Title ID → EN */}

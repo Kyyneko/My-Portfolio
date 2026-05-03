@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS projects (
   core_features_en TEXT DEFAULT '',
   core_features_id TEXT DEFAULT '',
   image_url TEXT DEFAULT '',
+  gallery_urls TEXT[] DEFAULT '{}',
   live_url TEXT DEFAULT '',
   github_url TEXT DEFAULT '',
   tech_stack TEXT[] DEFAULT '{}',
@@ -63,6 +64,7 @@ CREATE TABLE IF NOT EXISTS projects (
 -- ALTER TABLE projects ADD COLUMN tech_rationale_id TEXT DEFAULT '';
 -- ALTER TABLE projects ADD COLUMN core_features_en TEXT DEFAULT '';
 -- ALTER TABLE projects ADD COLUMN core_features_id TEXT DEFAULT '';
+-- ALTER TABLE projects ADD COLUMN gallery_urls TEXT[] DEFAULT '{}';
 
 -- 4. CERTIFICATES TABLE
 CREATE TABLE IF NOT EXISTS certificates (

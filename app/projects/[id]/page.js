@@ -8,7 +8,7 @@ import { ThemeProvider } from '@/lib/theme';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ParticlesBg from '@/components/ParticlesBg';
-import { ArrowLeft, ExternalLink, Github, Star, Calendar, Layers, Code } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Github, Star, Calendar, Layers, Code, ChevronLeft, ChevronRight } from 'lucide-react';
 import styles from './page.module.css';
 import Link from 'next/link';
 
@@ -18,6 +18,7 @@ function ProjectDetailContent() {
     const { lang, t } = useLanguage();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
         async function fetchProject() {
@@ -54,6 +55,21 @@ function ProjectDetailContent() {
     const longDesc = lang === 'en' ? project.long_description_en : project.long_description_id || project.long_description_en;
     const techRationale = lang === 'en' ? project.tech_rationale_en : project.tech_rationale_id || project.tech_rationale_en;
     const coreFeatures = lang === 'en' ? project.core_features_en : project.core_features_id || project.core_features_en;
+
+    const allImages = [];
+    if (project.image_url && project.image_url !== '#') allImages.push(project.image_url);
+    if (project.gallery_urls && project.gallery_urls.length > 0) {
+        allImages.push(...project.gallery_urls);
+    }
+
+    const nextSlide = () => setCurrentSlide(prev => (prev + 1) % allImages.length);
+    const prevSlide = () => setCurrentSlide(prev => (prev - 1 + allImages.length) % allImages.length);
+
+    useEffect(() => {
+        if (allImages.length <= 1) return;
+        const interval = setInterval(nextSlide, 5000);
+        return () => clearInterval(interval);
+    }, [allImages.length]);
 
     return (
         <main className={styles.main}>
@@ -92,10 +108,38 @@ function ProjectDetailContent() {
                         </div>
                     </header>
 
-                    {project.image_url && project.image_url !== '#' && (
+                    {allImages.length > 0 && (
                         <div className={styles.imageContainer}>
-                            <img src={project.image_url} alt={title} className={styles.heroImage} />
+                            {allImages.map((img, idx) => (
+                                <img
+                                    key={idx}
+                                    src={img}
+                                    alt={`${title} - ${idx + 1}`}
+                                    className={`${styles.heroImage} ${idx === currentSlide ? styles.activeSlide : styles.inactiveSlide}`}
+                                />
+                            ))}
                             <div className={styles.imageOverlay}></div>
+                            
+                            {allImages.length > 1 && (
+                                <>
+                                    <button onClick={prevSlide} className={`${styles.carouselBtn} ${styles.prevBtn}`}>
+                                        <ChevronLeft size={24} />
+                                    </button>
+                                    <button onClick={nextSlide} className={`${styles.carouselBtn} ${styles.nextBtn}`}>
+                                        <ChevronRight size={24} />
+                                    </button>
+                                    
+                                    <div className={styles.carouselDots}>
+                                        {allImages.map((_, idx) => (
+                                            <button 
+                                                key={idx} 
+                                                onClick={() => setCurrentSlide(idx)}
+                                                className={`${styles.dot} ${idx === currentSlide ? styles.activeDot : ''}`}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )}
 
