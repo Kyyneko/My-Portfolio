@@ -73,8 +73,8 @@
 
   /* Spacing */
   --section-padding: 4rem 0;
-  --container-max: 1200px;
-  --container-padding: 0 1.5rem;
+  --container-max: 1440px;
+  --container-padding: 0 3rem;
 
   /* Border Radius */
   --radius-sm: 6px;
