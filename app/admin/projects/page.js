@@ -8,7 +8,7 @@ import ImageCropper from '@/components/ImageCropper';
 import styles from '../admin.module.css';
 
 const emptyProject = {
-    title_en: '', title_id: '', description_en: '', description_id: '',
+    title_en: '', title_id: '', slug: '', description_en: '', description_id: '',
     long_description_en: '', long_description_id: '', tech_rationale_en: '', tech_rationale_id: '',
     core_features_en: '', core_features_id: '',
     image_url: '', gallery_urls: [], live_url: '', github_url: '', tech_stack: [],
@@ -46,13 +46,25 @@ export default function AdminProjects() {
     };
     const close = () => setEditing(null);
 
+    const generateSlug = (text) => {
+        if (!text) return '';
+        return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    };
+
     const save = async () => {
         setSaving(true);
         try {
             const validTechList = techList.filter(t => t.name && t.name.trim() !== '');
             const names = validTechList.map(t => t.name.trim());
+            
+            let finalSlug = editing.slug;
+            if (!finalSlug && editing.title_en) {
+                finalSlug = generateSlug(editing.title_en);
+            }
+
             const data = { 
                 ...editing, 
+                slug: finalSlug,
                 tech_stack: names,
                 tech_rationale_en: JSON.stringify(validTechList)
             };
@@ -292,7 +304,15 @@ export default function AdminProjects() {
                                     <label className="form-label" style={{ margin: 0 }}>Title (EN) 🇺🇸</label>
                                     <TranslateButton sourceText={editing.title_id} onTranslated={(t) => update('title_en', t)} />
                                 </div>
-                                <input className="form-input" value={editing.title_en} onChange={e => update('title_en', e.target.value)} placeholder="Title in English" />
+                                <input className="form-input" value={editing.title_en} onChange={e => {
+                                    update('title_en', e.target.value);
+                                    if (!editing.id) update('slug', generateSlug(e.target.value));
+                                }} placeholder="Title in English" />
+                            </div>
+                            
+                            <div className={`form-group ${styles.formFull}`}>
+                                <label className="form-label">URL Slug (e.g., my-project)</label>
+                                <input className="form-input" value={editing.slug || ''} onChange={e => update('slug', e.target.value)} placeholder="Auto-generated from Title (EN) if left empty" />
                             </div>
 
                             {/* Description ID → EN */}

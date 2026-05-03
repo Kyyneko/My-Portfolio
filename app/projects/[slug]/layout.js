@@ -1,8 +1,8 @@
-import { getProjectById } from '@/lib/data';
+import { getProjectBySlug } from '@/lib/data';
 
 export async function generateMetadata({ params }) {
     try {
-        const project = await getProjectById(params.id);
+        const project = await getProjectBySlug(params.slug);
         
         if (!project) {
             return {

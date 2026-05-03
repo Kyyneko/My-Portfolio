@@ -31,7 +31,7 @@ export default function Projects({ projects }) {
                                     )}
 
                                     {project.image_url && project.image_url !== '#' ? (
-                                        <Link href={`/projects/${project.id}`} className={styles.projectImageWrapper}>
+                                        <Link href={`/projects/${project.slug}`} className={styles.projectImageWrapper}>
                                             <Image 
                                                 src={project.image_url} 
                                                 alt={title} 
@@ -41,13 +41,13 @@ export default function Projects({ projects }) {
                                             />
                                         </Link>
                                     ) : (
-                                        <Link href={`/projects/${project.id}`} className={styles.projectImagePlaceholder}>
+                                        <Link href={`/projects/${project.slug}`} className={styles.projectImagePlaceholder}>
                                             <FolderOpen size={40} />
                                         </Link>
                                     )}
 
                                     <div className={styles.projectContentBody}>
-                                        <Link href={`/projects/${project.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <Link href={`/projects/${project.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                             <h3 className={styles.projectTitle}>{title}</h3>
                                         </Link>
                                         <p className={styles.projectDesc}>{desc}</p>
@@ -59,7 +59,7 @@ export default function Projects({ projects }) {
                                         </div>
 
                                         <div className={styles.projectLinks}>
-                                            <Link href={`/projects/${project.id}`} className="btn btn-primary btn-sm">
+                                            <Link href={`/projects/${project.slug}`} className="btn btn-primary btn-sm">
                                                 {lang === 'en' ? 'Details' : 'Detail'}
                                             </Link>
                                             {project.live_url && project.live_url !== '#' && (

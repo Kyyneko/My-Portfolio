@@ -12,7 +12,7 @@ export default async function sitemap() {
   }
   
   const projectUrls = projects.map((project) => ({
-    url: `${baseUrl}/projects/${project.id}`,
+    url: `${baseUrl}/projects/${project.slug}`,
     lastModified: new Date(),
     changeFrequency: 'monthly',
     priority: 0.8,

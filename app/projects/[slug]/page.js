@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getProjectById } from '@/lib/data';
+import { getProjectBySlug } from '@/lib/data';
 import { useLanguage, LanguageProvider } from '@/lib/i18n';
 import { ThemeProvider } from '@/lib/theme';
 import Navbar from '@/components/Navbar';
@@ -23,9 +23,9 @@ function ProjectDetailContent() {
 
     useEffect(() => {
         async function fetchProject() {
-            if (!params?.id) return;
+            if (!params?.slug) return;
             try {
-                const data = await getProjectById(params.id);
+                const data = await getProjectBySlug(params.slug);
                 if (data) {
                     setProject(data);
                 } else {
@@ -39,7 +39,7 @@ function ProjectDetailContent() {
             }
         }
         fetchProject();
-    }, [params?.id, router]);
+    }, [params?.slug, router]);
 
     const allImages = [];
     if (project?.image_url && project.image_url !== '#') allImages.push(project.image_url);
