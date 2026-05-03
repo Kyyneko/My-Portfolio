@@ -50,7 +50,7 @@ export default function Hero({ profile }) {
     const [loaded, setLoaded] = useState(false);
     const [showScroll, setShowScroll] = useState(true);
 
-    const roleTitles = ['AI-Powered Full Stack Developer'];
+    const roleTitles = ['Backend Developer & Data Analytics'];
 
     useEffect(() => {
         setLoaded(true);
