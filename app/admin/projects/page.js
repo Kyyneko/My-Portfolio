@@ -18,7 +18,7 @@ const emptyProject = {
 export default function AdminProjects() {
     const [items, setItems] = useState([]);
     const [editing, setEditing] = useState(null);
-    const [techInput, setTechInput] = useState('');
+    const [techList, setTechList] = useState([]);
     const [toast, setToast] = useState('');
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -32,14 +32,30 @@ export default function AdminProjects() {
     const load = () => getProjects().then(setItems);
     useEffect(() => { load(); }, []);
 
-    const openNew = () => { setEditing({ ...emptyProject }); setTechInput(''); };
-    const openEdit = (item) => { setEditing({ ...item }); setTechInput((item.tech_stack || []).join(', ')); };
+    const openNew = () => { setEditing({ ...emptyProject }); setTechList([]); };
+    const openEdit = (item) => { 
+        setEditing({ ...item }); 
+        let parsedTech = [];
+        try {
+            parsedTech = JSON.parse(item.tech_rationale_en || '[]');
+            if (!Array.isArray(parsedTech)) parsedTech = [];
+        } catch (e) {
+            parsedTech = (item.tech_stack || []).map(t => ({ name: t, reason_id: '', reason_en: '' }));
+        }
+        setTechList(parsedTech);
+    };
     const close = () => setEditing(null);
 
     const save = async () => {
         setSaving(true);
         try {
-            const data = { ...editing, tech_stack: techInput.split(',').map(s => s.trim()).filter(Boolean) };
+            const validTechList = techList.filter(t => t.name && t.name.trim() !== '');
+            const names = validTechList.map(t => t.name.trim());
+            const data = { 
+                ...editing, 
+                tech_stack: names,
+                tech_rationale_en: JSON.stringify(validTechList)
+            };
             await upsertProject(data);
             await load(); close();
             setToast('Project saved!');
@@ -81,6 +97,16 @@ export default function AdminProjects() {
     };
 
     const update = (key, val) => setEditing(prev => ({ ...prev, [key]: val }));
+
+    const addTech = () => setTechList(prev => [...prev, { name: '', reason_id: '', reason_en: '' }]);
+    const removeTech = (index) => setTechList(prev => prev.filter((_, i) => i !== index));
+    const updateTech = (index, field, value) => {
+        setTechList(prev => {
+            const next = [...prev];
+            next[index] = { ...next[index], [field]: value };
+            return next;
+        });
+    };
 
     // Step 1: File selected → open cropper
     const handleFileSelect = (file) => {
@@ -295,36 +321,48 @@ export default function AdminProjects() {
                                 <textarea className="form-textarea" style={{ minHeight: '120px' }} value={editing.long_description_en} onChange={e => update('long_description_en', e.target.value)} placeholder="Detailed explanation of the project..." />
                             </div>
 
-                            {/* Tech Rationale ID → EN */}
+                            {/* Dynamic Tech Stack */}
                             <div className={`form-group ${styles.formFull}`}>
-                                <label className="form-label">Tech Stack Rationale (ID) 🇮🇩</label>
-                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.tech_rationale_id} onChange={e => update('tech_rationale_id', e.target.value)} placeholder="Alasan memilih tech stack ini..." />
-                            </div>
-                            <div className={`form-group ${styles.formFull}`}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                                    <label className="form-label" style={{ margin: 0 }}>Tech Stack Rationale (EN) 🇺🇸</label>
-                                    <TranslateButton sourceText={editing.tech_rationale_id} onTranslated={(t) => update('tech_rationale_en', t)} />
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
+                                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Tech Stack & Architecture</h3>
+                                    <button type="button" onClick={addTech} className="btn btn-secondary btn-sm" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}><Plus size={14} /> Add Tech Stack</button>
                                 </div>
-                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.tech_rationale_en} onChange={e => update('tech_rationale_en', e.target.value)} placeholder="Reasons for choosing this tech stack..." />
-                            </div>
-
-                            {/* Core Features ID → EN */}
-                            <div className={`form-group ${styles.formFull}`}>
-                                <label className="form-label">Core Features (ID) 🇮🇩</label>
-                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.core_features_id} onChange={e => update('core_features_id', e.target.value)} placeholder="Alasan memakai fitur-fitur pokok..." />
-                            </div>
-                            <div className={`form-group ${styles.formFull}`}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                                    <label className="form-label" style={{ margin: 0 }}>Core Features (EN) 🇺🇸</label>
-                                    <TranslateButton sourceText={editing.core_features_id} onTranslated={(t) => update('core_features_en', t)} />
+                                
+                                {techList.length === 0 && (
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontStyle: 'italic' }}>No tech stack added yet. Click the button above to add one.</p>
+                                )}
+                                
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    {techList.map((tech, idx) => (
+                                        <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem', position: 'relative' }}>
+                                            <button type="button" onClick={() => removeTech(idx)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(220,50,50,0.1)', color: '#ef4444', border: 'none', borderRadius: '6px', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Trash2 size={14} /></button>
+                                            
+                                            <div className="form-group" style={{ maxWidth: '300px' }}>
+                                                <label className="form-label">Tech Name</label>
+                                                <input className="form-input" value={tech.name} onChange={e => updateTech(idx, 'name', e.target.value)} placeholder="e.g. Next.js, Supabase, Tailwind" />
+                                            </div>
+                                            
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                                    <label className="form-label">Reason (ID) 🇮🇩</label>
+                                                    <textarea className="form-textarea" style={{ minHeight: '80px' }} value={tech.reason_id} onChange={e => updateTech(idx, 'reason_id', e.target.value)} placeholder="Alasan mengapa menggunakan teknologi ini..." />
+                                                </div>
+                                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                                                        <label className="form-label" style={{ margin: 0 }}>Reason (EN) 🇺🇸</label>
+                                                        <TranslateButton sourceText={tech.reason_id} onTranslated={(t) => updateTech(idx, 'reason_en', t)} />
+                                                    </div>
+                                                    <textarea className="form-textarea" style={{ minHeight: '80px' }} value={tech.reason_en} onChange={e => updateTech(idx, 'reason_en', e.target.value)} placeholder="Reason for using this technology..." />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <textarea className="form-textarea" style={{ minHeight: '100px' }} value={editing.core_features_en} onChange={e => update('core_features_en', e.target.value)} placeholder="Reasons for using core features..." />
                             </div>
 
                             <div className="form-group"><label className="form-label">Live URL</label><input className="form-input" value={editing.live_url} onChange={e => update('live_url', e.target.value)} placeholder="https://..." /></div>
                             <div className="form-group"><label className="form-label">GitHub URL</label><input className="form-input" value={editing.github_url} onChange={e => update('github_url', e.target.value)} placeholder="https://github.com/..." /></div>
                             <div className="form-group"><label className="form-label">Sort Order</label><input type="number" className="form-input" value={editing.sort_order} onChange={e => update('sort_order', parseInt(e.target.value) || 0)} /></div>
-                            <div className={`form-group ${styles.formFull}`}><label className="form-label">Tech Stack (comma-separated)</label><input className="form-input" value={techInput} onChange={e => setTechInput(e.target.value)} placeholder="Next.js, React, Supabase" /></div>
                             <div className="form-group">
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
                                     <input type="checkbox" checked={editing.featured} onChange={e => update('featured', e.target.checked)} />

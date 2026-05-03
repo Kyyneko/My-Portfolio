@@ -298,31 +298,42 @@
     color: var(--text-primary);
 }
 
-.techStackList {
+.dynamicTechList {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dynamicTechItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dynamicTechItem:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.techBadgeContainer {
+    display: flex;
+    align-items: center;
 }
 
 .techBadge {
     background: rgba(96,165,250,0.1);
     color: var(--accent-primary);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
     font-weight: 600;
     border: 1px solid rgba(96,165,250,0.2);
+    display: inline-block;
 }
 
-.techRationale h4 {
-    margin-top: 0;
-    margin-bottom: 0.75rem;
-    font-size: 1.1rem;
-    color: var(--text-primary);
-}
-
-.techRationale p {
+.techReason {
     color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.6;

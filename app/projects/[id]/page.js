@@ -70,8 +70,19 @@ function ProjectDetailContent() {
     const title = lang === 'en' ? project.title_en : project.title_id || project.title_en;
     const desc = lang === 'en' ? project.description_en : project.description_id || project.description_en;
     const longDesc = lang === 'en' ? project.long_description_en : project.long_description_id || project.long_description_en;
-    const techRationale = lang === 'en' ? project.tech_rationale_en : project.tech_rationale_id || project.tech_rationale_en;
     const coreFeatures = lang === 'en' ? project.core_features_en : project.core_features_id || project.core_features_en;
+
+    let techStackList = [];
+    try {
+        techStackList = JSON.parse(project.tech_rationale_en || '[]');
+        if (!Array.isArray(techStackList)) techStackList = [];
+    } catch {
+        techStackList = (project.tech_stack || []).map(t => ({
+            name: t,
+            reason_id: project.tech_rationale_id || '',
+            reason_en: project.tech_rationale_en || ''
+        }));
+    }
 
     return (
         <main className={styles.main}>
@@ -162,15 +173,27 @@ function ProjectDetailContent() {
                             <div className={styles.sidebarCard}>
                                 <h3><Code className={styles.sectionIcon} /> {lang === 'en' ? 'Tech Stack & Architecture' : 'Tech Stack & Arsitektur'}</h3>
                                 
-                                <div className={styles.techStackList}>
-                                    {(project.tech_stack || []).map((tech, i) => (
-                                        <span key={i} className={styles.techBadge}>{tech}</span>
-                                    ))}
-                                </div>
-
-                                <div className={styles.techRationale}>
-                                    <h4>{lang === 'en' ? 'Why this stack?' : 'Mengapa stack ini?'}</h4>
-                                    <p dangerouslySetInnerHTML={{ __html: (techRationale || '').replace(/\n/g, '<br/>') || (lang === 'en' ? 'No rationale provided.' : 'Tidak ada alasan yang diberikan.') }} />
+                                <div className={styles.dynamicTechList}>
+                                    {techStackList.map((tech, i) => {
+                                        const reason = lang === 'en' ? tech.reason_en : tech.reason_id || tech.reason_en;
+                                        return (
+                                            <div key={i} className={styles.dynamicTechItem}>
+                                                <div className={styles.techBadgeContainer}>
+                                                    <span className={styles.techBadge}>{tech.name}</span>
+                                                </div>
+                                                {reason ? (
+                                                    <div className={styles.techReason} dangerouslySetInnerHTML={{ __html: reason.replace(/\n/g, '<br/>') }} />
+                                                ) : (
+                                                    <div className={styles.techReason} style={{ fontStyle: 'italic', opacity: 0.6 }}>
+                                                        {lang === 'en' ? 'No rationale provided.' : 'Tidak ada alasan.'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                    {techStackList.length === 0 && (
+                                        <p style={{ color: 'var(--text-muted)' }}>{lang === 'en' ? 'No tech stack details.' : 'Tidak ada detail tech stack.'}</p>
+                                    )}
                                 </div>
                             </div>
                         </aside>
