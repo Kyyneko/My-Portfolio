@@ -6,6 +6,26 @@ import styles from './Projects.module.css';
 import Link from 'next/link';
 import Image from 'next/image';
 
+const getCleanTechStack = (techStack) => {
+    if (!techStack || !Array.isArray(techStack)) return [];
+    
+    const cleanTechs = [];
+    techStack.forEach(tech => {
+        // Extract part after colon if exists (e.g. "Backend Framework: Laravel 10" -> "Laravel 10")
+        let parts = tech.includes(':') ? tech.split(':')[1] : tech;
+        
+        // Remove parentheses and their contents (e.g. "SQLite (Default Development)" -> "SQLite")
+        parts = parts.replace(/\([^)]*\)/g, '');
+        
+        // Split by comma in case there are multiple items in one string (e.g. "Blade Templates, Alpine.js")
+        const items = parts.split(',').map(item => item.trim()).filter(Boolean);
+        
+        cleanTechs.push(...items);
+    });
+    
+    return cleanTechs;
+};
+
 export default function Projects({ projects }) {
     const { lang, t } = useLanguage();
 
@@ -21,6 +41,10 @@ export default function Projects({ projects }) {
                     {projects.map(project => {
                         const title = lang === 'en' ? project.title_en : project.title_id;
                         const desc = lang === 'en' ? project.description_en : project.description_id;
+                        const cleanTechs = getCleanTechStack(project.tech_stack);
+                        const visibleTechs = cleanTechs.slice(0, 4);
+                        const remainingCount = cleanTechs.length - visibleTechs.length;
+                        
                         return (
                             <div key={project.id} className={`card ${styles.projectCard}`}>
                                 <div className={styles.cardContent}>
@@ -52,10 +76,15 @@ export default function Projects({ projects }) {
                                         </Link>
                                         <p className={styles.projectDesc}>{desc}</p>
 
-                                        <div className={styles.techStack}>
-                                            {(project.tech_stack || []).map((tech, i) => (
+                                         <div className={styles.techStack}>
+                                            {visibleTechs.map((tech, i) => (
                                                 <span key={i} className="badge">{tech}</span>
                                             ))}
+                                            {remainingCount > 0 && (
+                                                <span className="badge badge-purple" style={{ opacity: 0.95 }}>
+                                                    +{remainingCount} {lang === 'en' ? 'more' : 'lainnya'}
+                                                </span>
+                                            )}
                                         </div>
 
                                         <div className={styles.projectLinks}>
