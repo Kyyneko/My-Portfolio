@@ -1,16 +1,40 @@
-.about {
-    position: relative;
-}
-
 .aboutGrid {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 3rem;
+    grid-template-columns: 280px 1fr;
+    gap: 3.5rem;
+    align-items: start;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.avatarColumn {
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: 1.5rem;
 }
 
 .avatarWrapper {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatarGlow {
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: var(--radius-xl);
+    background: var(--gradient-primary);
+    opacity: 0.15;
+    filter: blur(30px);
+    animation: avatarGlowPulse 4s ease-in-out infinite;
+}
+
+@keyframes avatarGlowPulse {
+    0%, 100% { opacity: 0.12; transform: scale(1); }
+    50% { opacity: 0.2; transform: scale(1.05); }
 }
 
 .avatar {
@@ -18,47 +42,133 @@
     height: 220px;
     border-radius: var(--radius-xl);
     object-fit: cover;
-    border: 3px solid var(--border-accent);
-    box-shadow: var(--shadow-glow);
+    border: 3px solid transparent;
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-image:
+        linear-gradient(var(--bg-primary), var(--bg-primary)),
+        var(--gradient-primary);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.03);
 }
 
 .avatarPlaceholder {
     width: 220px;
     height: 220px;
     border-radius: var(--radius-xl);
-    background: var(--gradient-card);
-    border: 3px solid var(--border-accent);
+    background: var(--bg-card);
+    border: 3px solid transparent;
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-image:
+        linear-gradient(var(--bg-card), var(--bg-card)),
+        var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent-primary);
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: 1;
+}
+
+/* Quick info items */
+.quickInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.infoItem {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.infoItem:hover {
+    border-color: var(--border-accent);
+    color: var(--text-primary);
+}
+
+.infoIcon {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+/* Bio column */
+.bioColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
 }
 
 .bio {
     color: var(--text-secondary);
     font-size: var(--font-size-lg);
     line-height: 1.8;
+    margin-bottom: 1.5rem;
 }
 
 .bioCodeBlock {
     background: var(--bg-code);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 1.5rem;
-    margin-top: 1.5rem;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.codeHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.codeDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.codeFileName {
+    margin-left: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.codeBody {
+    padding: 1rem 1.25rem;
     font-family: var(--font-mono);
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
+    line-height: 1.8;
 }
 
-.bioCodeBlock .lineNum {
+.codeBody .lineNum {
     color: var(--text-muted);
     user-select: none;
     margin-right: 1rem;
     min-width: 1.5rem;
     display: inline-block;
     text-align: right;
+    opacity: 0.5;
 }
 
 @media (max-width: 768px) {
@@ -68,13 +178,28 @@
         gap: 2rem;
     }
 
-    .avatarWrapper {
+    .avatarColumn {
         margin: 0 auto;
     }
 
     .avatar,
     .avatarPlaceholder {
-        width: 160px;
-        height: 160px;
+        width: 180px;
+        height: 180px;
+    }
+
+    .avatarGlow {
+        width: 200px;
+        height: 200px;
+    }
+
+    .quickInfo {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .infoItem {
+        flex: 1;
+        justify-content: center;
     }
 }

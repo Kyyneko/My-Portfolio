@@ -1,6 +1,6 @@
 'use client';
 import { useLanguage } from '@/lib/i18n';
-import { ChevronDown, FileText, Mail, Github, Linkedin, ArrowRight } from 'lucide-react';
+import { ChevronDown, FileText, Mail, Github, Linkedin, ArrowRight, Code2, Database, BarChart3 } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import styles from './Hero.module.css';
 
@@ -39,6 +39,54 @@ function TypeWriter({ texts, speed = 80, deleteSpeed = 40, pauseTime = 2000 }) {
             {text}
             <span className={styles.cursor}>|</span>
         </span>
+    );
+}
+
+function StatItem({ value, label, delay }) {
+    const [count, setCount] = useState(0);
+    const [visible, setVisible] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setVisible(true);
+                    observer.unobserve(entry.target);
+                }
+            },
+            { threshold: 0.5 }
+        );
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!visible) return;
+        const timer = setTimeout(() => {
+            const duration = 1500;
+            const steps = 30;
+            const stepValue = value / steps;
+            let current = 0;
+            const interval = setInterval(() => {
+                current += stepValue;
+                if (current >= value) {
+                    setCount(value);
+                    clearInterval(interval);
+                } else {
+                    setCount(Math.floor(current));
+                }
+            }, duration / steps);
+            return () => clearInterval(interval);
+        }, delay);
+        return () => clearTimeout(timer);
+    }, [visible, value, delay]);
+
+    return (
+        <div className={styles.statItem} ref={ref}>
+            <span className={styles.statValue}>{count}+</span>
+            <span className={styles.statLabel}>{label}</span>
+        </div>
     );
 }
 
@@ -134,7 +182,23 @@ export default function Hero({ profile }) {
                     )}
                 </div>
 
-                {/* Terminal card removed */}
+                {/* Expertise badges */}
+                <div className={styles.expertiseBadges}>
+                    <div className={styles.expertiseBadge}>
+                        <Code2 size={14} />
+                        <span>Backend</span>
+                    </div>
+                    <div className={styles.expertiseDivider} />
+                    <div className={styles.expertiseBadge}>
+                        <Database size={14} />
+                        <span>Database</span>
+                    </div>
+                    <div className={styles.expertiseDivider} />
+                    <div className={styles.expertiseBadge}>
+                        <BarChart3 size={14} />
+                        <span>Analytics</span>
+                    </div>
+                </div>
             </div>
 
             <div className={`${styles.scrollHint} ${showScroll ? styles.scrollVisible : styles.scrollHidden}`} onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}>

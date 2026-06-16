@@ -54,22 +54,31 @@ export default function Home() {
             background: 'var(--bg-primary)',
             fontFamily: 'var(--font-mono)',
             color: 'var(--accent-primary)',
-            fontSize: '1.25rem',
           }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{
-                width: '48px',
-                height: '48px',
-                border: '3px solid rgba(96,165,250,0.15)',
+                width: '44px',
+                height: '44px',
+                border: '2px solid rgba(96,165,250,0.08)',
                 borderTopColor: 'var(--accent-primary)',
+                borderRightColor: 'var(--accent-secondary)',
                 borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
                 margin: '0 auto 1.5rem',
               }} />
-              <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                Loading portfolio...
+              <div style={{
+                fontSize: '0.8rem',
+                color: 'var(--text-muted)',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                animation: 'loadPulse 1.5s ease-in-out infinite',
+              }}>
+                Loading...
               </div>
-              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+              <style>{`
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes loadPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+              `}</style>
             </div>
           </div>
         </ThemeProvider>

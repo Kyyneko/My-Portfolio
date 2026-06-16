@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
@@ -12,8 +12,34 @@ export default function Navbar() {
     const { lang, switchLanguage, t } = useLanguage();
     const { theme, toggleTheme } = useTheme();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [activeSection, setActiveSection] = useState('');
+    const [scrolled, setScrolled] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+
+    // Scroll spy
+    useEffect(() => {
+        if (pathname !== '/') return;
+
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+
+            const scrollPos = window.scrollY + 100;
+            let current = '';
+
+            for (const sec of sections) {
+                const el = document.getElementById(sec);
+                if (el && el.offsetTop <= scrollPos) {
+                    current = sec;
+                }
+            }
+            setActiveSection(current);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [pathname]);
 
     const scrollTo = (id) => {
         setMobileOpen(false);
@@ -33,7 +59,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className={styles.navbar}>
+        <nav className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ''}`}>
             <div className={styles.navInner}>
                 <div className={styles.logo} onClick={handleLogoClick}>
                     <span className={styles.logoAccent}>{'<'}</span>
@@ -44,7 +70,10 @@ export default function Navbar() {
                 <ul className={styles.navLinks}>
                     {sections.map(sec => (
                         <li key={sec}>
-                            <button className={styles.navLink} onClick={() => scrollTo(sec)}>
+                            <button
+                                className={`${styles.navLink} ${activeSection === sec ? styles.navLinkActive : ''}`}
+                                onClick={() => scrollTo(sec)}
+                            >
                                 {t(`nav.${sec}`)}
                             </button>
                         </li>
@@ -75,7 +104,11 @@ export default function Navbar() {
 
             <div className={`${styles.mobileMenu} ${mobileOpen ? styles.mobileMenuOpen : ''}`}>
                 {sections.map(sec => (
-                    <button key={sec} className={styles.navLink} onClick={() => scrollTo(sec)}>
+                    <button
+                        key={sec}
+                        className={`${styles.navLink} ${activeSection === sec ? styles.navLinkActive : ''}`}
+                        onClick={() => scrollTo(sec)}
+                    >
                         {t(`nav.${sec}`)}
                     </button>
                 ))}

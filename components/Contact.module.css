@@ -1,8 +1,8 @@
 .contactGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    max-width: 900px;
+    gap: 1.25rem;
+    max-width: 800px;
     margin: 0 auto;
 }
 
@@ -13,12 +13,13 @@
     text-decoration: none;
     color: var(--text-primary);
     min-width: 0;
+    padding: 1.25rem 1.5rem !important;
 }
 
 .contactIcon {
     flex-shrink: 0;
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
@@ -27,55 +28,56 @@
 }
 
 .contactCard:hover .contactIcon {
-    transform: scale(1.1);
+    transform: scale(1.1) translateY(-2px);
 }
 
 .iconEmail {
-    background: rgba(96, 165, 250, 0.1);
+    background: rgba(96, 165, 250, 0.08);
     color: var(--accent-primary);
 }
 
 .contactCard:hover .iconEmail {
-    background: rgba(96, 165, 250, 0.2);
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
+    background: rgba(96, 165, 250, 0.15);
+    box-shadow: 0 4px 20px rgba(96, 165, 250, 0.2);
 }
 
 .iconGithub {
-    background: rgba(167, 139, 250, 0.1);
+    background: rgba(167, 139, 250, 0.08);
     color: var(--accent-secondary);
 }
 
 .contactCard:hover .iconGithub {
-    background: rgba(167, 139, 250, 0.2);
-    box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
+    background: rgba(167, 139, 250, 0.15);
+    box-shadow: 0 4px 20px rgba(167, 139, 250, 0.2);
 }
 
 .iconLinkedin {
-    background: rgba(52, 211, 153, 0.1);
+    background: rgba(52, 211, 153, 0.08);
     color: var(--accent-green);
 }
 
 .contactCard:hover .iconLinkedin {
-    background: rgba(52, 211, 153, 0.2);
-    box-shadow: 0 0 20px rgba(52, 211, 153, 0.2);
+    background: rgba(52, 211, 153, 0.15);
+    box-shadow: 0 4px 20px rgba(52, 211, 153, 0.2);
 }
 
 .iconInstagram {
-    background: rgba(244, 114, 182, 0.1);
+    background: rgba(244, 114, 182, 0.08);
     color: var(--accent-pink);
 }
 
 .contactCard:hover .iconInstagram {
-    background: rgba(244, 114, 182, 0.2);
-    box-shadow: 0 0 20px rgba(244, 114, 182, 0.2);
+    background: rgba(244, 114, 182, 0.15);
+    box-shadow: 0 4px 20px rgba(244, 114, 182, 0.2);
 }
 
 .contactLabel {
     font-size: var(--font-size-xs);
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.125rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.2rem;
+    font-weight: 500;
 }
 
 .contactValue {
