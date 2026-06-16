@@ -341,6 +341,19 @@ export default function AdminProjects() {
                                 <textarea className="form-textarea" style={{ minHeight: '120px' }} value={editing.long_description_en} onChange={e => update('long_description_en', e.target.value)} placeholder="Detailed explanation of the project..." />
                             </div>
 
+                            {/* Core Features ID → EN */}
+                            <div className={`form-group ${styles.formFull}`}>
+                                <label className="form-label">Core Features & Rationale (ID) 🇮🇩</label>
+                                <textarea className="form-textarea" style={{ minHeight: '120px' }} value={editing.core_features_id} onChange={e => update('core_features_id', e.target.value)} placeholder="Fitur utama dan alasan penggunaannya..." />
+                            </div>
+                            <div className={`form-group ${styles.formFull}`}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+                                    <label className="form-label" style={{ margin: 0 }}>Core Features & Rationale (EN) 🇺🇸</label>
+                                    <TranslateButton sourceText={editing.core_features_id} onTranslated={(t) => update('core_features_en', t)} />
+                                </div>
+                                <textarea className="form-textarea" style={{ minHeight: '120px' }} value={editing.core_features_en} onChange={e => update('core_features_en', e.target.value)} placeholder="Core features and rationale..." />
+                            </div>
+
                             {/* Dynamic Tech Stack */}
                             <div className={`form-group ${styles.formFull}`}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
