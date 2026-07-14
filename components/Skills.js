@@ -1,27 +1,34 @@
 'use client';
 import { useLanguage } from '@/lib/i18n';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import styles from './Skills.module.css';
 
 export default function Skills({ skills }) {
     const { t, lang } = useLanguage();
 
-    const focusGroups = {};
-    const otherGroups = {};
+    const { focusGroups, otherGroups, otherCategories } = useMemo(() => {
+        const focus = {};
+        const other = {};
 
-    skills.forEach(skill => {
-        const cat = skill.category || 'Other';
-        const catLower = cat.toLowerCase();
-        if (catLower.includes('backend') || catLower.includes('data') || catLower.includes('ai') || catLower.includes('ml')) {
-            if (!focusGroups[cat]) focusGroups[cat] = [];
-            focusGroups[cat].push(skill);
-        } else {
-            if (!otherGroups[cat]) otherGroups[cat] = [];
-            otherGroups[cat].push(skill);
-        }
-    });
+        (skills || []).forEach(skill => {
+            const cat = skill.category || 'Other';
+            const catLower = cat.toLowerCase();
+            if (catLower.includes('backend') || catLower.includes('data') || catLower.includes('ai') || catLower.includes('ml')) {
+                if (!focus[cat]) focus[cat] = [];
+                focus[cat].push(skill);
+            } else {
+                if (!other[cat]) other[cat] = [];
+                other[cat].push(skill);
+            }
+        });
 
-    const otherCategories = Object.keys(otherGroups);
+        return {
+            focusGroups: focus,
+            otherGroups: other,
+            otherCategories: Object.keys(other),
+        };
+    }, [skills]);
+
     const [activeFilter, setActiveFilter] = useState(null);
 
     useEffect(() => {

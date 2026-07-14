@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getProjectBySlug } from '@/lib/data';
 import { useLanguage, LanguageProvider } from '@/lib/i18n';
@@ -41,11 +41,16 @@ function ProjectDetailContent() {
         fetchProject();
     }, [params?.slug, router]);
 
-    const allImages = [];
-    if (project?.image_url && project.image_url !== '#') allImages.push(project.image_url);
-    if (project?.gallery_urls && project.gallery_urls.length > 0) {
-        allImages.push(...project.gallery_urls);
-    }
+    // Compute allImages only when project is available (memoized for stable reference)
+    const allImages = useMemo(() => {
+        if (!project) return [];
+        const images = [];
+        if (project.image_url && project.image_url !== '#') images.push(project.image_url);
+        if (project.gallery_urls && project.gallery_urls.length > 0) {
+            images.push(...project.gallery_urls);
+        }
+        return images;
+    }, [project]);
 
     useEffect(() => {
         if (allImages.length <= 1) return;

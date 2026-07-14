@@ -17,6 +17,12 @@ import Education from '@/components/Education';
 import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 
+const fallbackProfile = {
+  id: 1, name_en: '', name_id: '', title_en: '', title_id: '',
+  bio_en: '', bio_id: '', avatar_url: '', resume_url: '',
+  email: '', github: '', linkedin: '', instagram: '',
+};
+
 export default function Home() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -32,9 +38,25 @@ export default function Home() {
           getExperience(),
           getEducation(),
         ]);
-        setData({ profile, skills, projects, certificates, experience, education });
+        setData({
+          profile: profile || fallbackProfile,
+          skills: skills || [],
+          projects: projects || [],
+          certificates: certificates || [],
+          experience: experience || [],
+          education: education || [],
+        });
       } catch (err) {
         console.error('Error loading data:', err);
+        // Provide fallback data so the page still renders
+        setData({
+          profile: fallbackProfile,
+          skills: [],
+          projects: [],
+          certificates: [],
+          experience: [],
+          education: [],
+        });
       } finally {
         setLoading(false);
       }

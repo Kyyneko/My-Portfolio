@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS skills (
 -- 3. PROJECTS TABLE
 CREATE TABLE IF NOT EXISTS projects (
   id SERIAL PRIMARY KEY,
+  slug TEXT DEFAULT '' UNIQUE,
   title_en TEXT NOT NULL,
   title_id TEXT DEFAULT '',
   description_en TEXT DEFAULT '',
