@@ -98,7 +98,7 @@ export default function Hero({ profile }) {
     const [loaded, setLoaded] = useState(false);
     const [showScroll, setShowScroll] = useState(true);
 
-    const roleTitles = ['Backend Developer & Data Analytics'];
+    const roleTitles = ['Backend Developer & AI-Powered Coder'];
 
     useEffect(() => {
         setLoaded(true);
@@ -196,7 +196,7 @@ export default function Hero({ profile }) {
                     <div className={styles.expertiseDivider} />
                     <div className={styles.expertiseBadge}>
                         <BarChart3 size={14} />
-                        <span>Analytics</span>
+                        <span>AI</span>
                     </div>
                 </div>
             </div>
