@@ -291,7 +291,74 @@
 }
 
 .richText p {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.richText p:last-child {
+    margin-bottom: 0;
+}
+
+/* Sub-headings (lines ending with :) */
+.richText h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 2rem 0 0.75rem;
+    padding-left: 0.85rem;
+    border-left: 3px solid var(--accent-primary);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+}
+
+.richText h4:first-child {
+    margin-top: 0;
+}
+
+/* Bullet lists */
+.richText ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.richText li {
+    position: relative;
+    padding: 0.6rem 0.9rem 0.6rem 1.75rem;
+    background: rgba(96, 165, 250, 0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    transition: all 0.25s ease;
+}
+
+.richText li::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0.95rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px rgba(96, 165, 250, 0.3);
+    flex-shrink: 0;
+}
+
+.richText li:hover {
+    background: rgba(96, 165, 250, 0.06);
+    border-color: var(--border-accent);
+    transform: translateX(4px);
+}
+
+/* Bold text */
+.richText strong {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .sidebar {

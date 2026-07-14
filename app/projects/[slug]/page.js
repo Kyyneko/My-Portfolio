@@ -13,6 +13,52 @@ import styles from './page.module.css';
 import Link from 'next/link';
 import Image from 'next/image';
 
+/**
+ * Converts plain text with markdown-like formatting into structured HTML.
+ * Supports: paragraphs, bullet lists (- ), sub-headings (lines ending with :),
+ * bold (**text**), and proper paragraph separation.
+ */
+function formatRichText(text) {
+    if (!text) return '';
+
+    const lines = text.split('\n');
+    let html = '';
+    let inList = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+        if (!line) {
+            if (inList) { html += '</ul>'; inList = false; }
+            continue;
+        }
+
+        // Bold: **text** → <strong>text</strong>
+        line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Bullet list item: starts with - or •
+        if (/^[-•]\s+/.test(line)) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            html += `<li>${line.replace(/^[-•]\s+/, '')}</li>`;
+            continue;
+        }
+
+        // Close any open list before non-list content
+        if (inList) { html += '</ul>'; inList = false; }
+
+        // Sub-heading: line ending with : and is relatively short (< 80 chars)
+        if (line.endsWith(':') && line.length < 80 && !line.startsWith('<')) {
+            html += `<h4>${line}</h4>`;
+            continue;
+        }
+
+        // Regular paragraph
+        html += `<p>${line}</p>`;
+    }
+
+    if (inList) html += '</ul>';
+    return html;
+}
+
 function ProjectDetailContent() {
     const params = useParams();
     const router = useRouter();
@@ -169,12 +215,12 @@ function ProjectDetailContent() {
                         <div className={styles.mainContent}>
                             <section className={styles.contentSection}>
                                 <h2><Layers className={styles.sectionIcon} /> {lang === 'en' ? 'Project Overview' : 'Ringkasan Proyek'}</h2>
-                                <div className={styles.richText} dangerouslySetInnerHTML={{ __html: (longDesc || '').replace(/\n/g, '<br/>') || (lang === 'en' ? 'No detailed overview provided.' : 'Tidak ada ringkasan detail.') }} />
+                                <div className={styles.richText} dangerouslySetInnerHTML={{ __html: formatRichText(longDesc) || (lang === 'en' ? '<p>No detailed overview provided.</p>' : '<p>Tidak ada ringkasan detail.</p>') }} />
                             </section>
 
                             <section className={styles.contentSection}>
                                 <h2><Star className={styles.sectionIcon} /> {lang === 'en' ? 'Core Features & Rationale' : 'Fitur Utama & Alasan'}</h2>
-                                <div className={styles.richText} dangerouslySetInnerHTML={{ __html: (coreFeatures || '').replace(/\n/g, '<br/>') || (lang === 'en' ? 'No feature details provided.' : 'Tidak ada detail fitur.') }} />
+                                <div className={styles.richText} dangerouslySetInnerHTML={{ __html: formatRichText(coreFeatures) || (lang === 'en' ? '<p>No feature details provided.</p>' : '<p>Tidak ada detail fitur.</p>') }} />
                             </section>
                         </div>
 
