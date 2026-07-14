@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/i18n';
 import { useTheme } from '@/lib/theme';
@@ -16,6 +16,40 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
+
+    // Refs for sliding indicator
+    const navLinksRef = useRef(null);
+    const linkRefs = useRef({});
+    const [indicatorStyle, setIndicatorStyle] = useState({ width: 0, left: 0, opacity: 0 });
+
+    // Update indicator position when active section changes
+    const updateIndicator = useCallback(() => {
+        if (!activeSection || !navLinksRef.current) {
+            setIndicatorStyle(prev => ({ ...prev, opacity: 0 }));
+            return;
+        }
+        const activeLink = linkRefs.current[activeSection];
+        const container = navLinksRef.current;
+        if (activeLink && container) {
+            const linkRect = activeLink.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            setIndicatorStyle({
+                width: linkRect.width,
+                left: linkRect.left - containerRect.left,
+                opacity: 1,
+            });
+        }
+    }, [activeSection]);
+
+    useEffect(() => {
+        updateIndicator();
+    }, [updateIndicator]);
+
+    // Also update on resize (font/layout changes)
+    useEffect(() => {
+        window.addEventListener('resize', updateIndicator);
+        return () => window.removeEventListener('resize', updateIndicator);
+    }, [updateIndicator]);
 
     // Scroll spy
     useEffect(() => {
@@ -71,10 +105,20 @@ export default function Navbar() {
                     <span className={styles.logoAccent}>{' />'}</span>
                 </div>
 
-                <ul className={styles.navLinks}>
+                <ul className={styles.navLinks} ref={navLinksRef}>
+                    {/* Sliding indicator */}
+                    <div
+                        className={styles.navIndicator}
+                        style={{
+                            width: `${indicatorStyle.width}px`,
+                            transform: `translateX(${indicatorStyle.left}px)`,
+                            opacity: indicatorStyle.opacity,
+                        }}
+                    />
                     {sections.map(sec => (
                         <li key={sec}>
                             <button
+                                ref={el => { linkRefs.current[sec] = el; }}
                                 className={`${styles.navLink} ${activeSection === sec ? styles.navLinkActive : ''}`}
                                 onClick={() => scrollTo(sec)}
                             >
