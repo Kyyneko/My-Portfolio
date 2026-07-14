@@ -24,13 +24,17 @@ export default function Navbar() {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
 
-            const scrollPos = window.scrollY + 100;
             let current = '';
 
             for (const sec of sections) {
                 const el = document.getElementById(sec);
-                if (el && el.offsetTop <= scrollPos) {
-                    current = sec;
+                if (el) {
+                    // Use getBoundingClientRect for accurate position regardless of
+                    // CSS transforms (e.g. ScrollReveal) or nested positioned parents
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= 120) {
+                        current = sec;
+                    }
                 }
             }
             setActiveSection(current);
